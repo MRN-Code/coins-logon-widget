@@ -23,5 +23,10 @@
     "testem": "^0.9.1",
     "webpack": "^1.10.5",
     "webpack-dev-server": "^1.10.1"
+  },
+  "scripts": {
+    "test": "testem ci",
+    "validate": "echo ''",
+    "lint": "jscs ./test/ ./src/ ./index.js"
   }
 }
