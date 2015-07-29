@@ -17,6 +17,11 @@
   },
   "homepage": "https://github.com/MRN-Code/coins-logon-widget#readme",
   "devDependencies": {
-    "testem": "^0.9.1"
+    "babel-loader": "^5.3.1",
+    "pre-commit": "^1.0.10",
+    "tape": "^4.0.1",
+    "testem": "^0.9.1",
+    "webpack": "^1.10.5",
+    "webpack-dev-server": "^1.10.1"
   }
 }
