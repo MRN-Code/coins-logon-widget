@@ -10,6 +10,18 @@ module.exports = function(grunt) {
             stylesDir: 'styles'
         },
         clean: ['.tmp', '<%= config.distDir %>'],
+        csso: {
+            options: {
+                banner: '/* coins-logon-widget */\n'
+            },
+            dist: {
+                expand: true,
+                cwd: '<%= config.distDir %>/',
+                src: ['*.css', '!*.min.css'],
+                dest: '<%= config.distDir %>/',
+                ext: '.min.css'
+            }
+        },
         postcss: {
             options: {
                 map: true, // Inline sourcemap
@@ -56,5 +68,5 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('default', ['clean', 'sass', 'postcss', 'watch']);
-    grunt.registerTask('build', ['clean', 'sass', 'postcss']);
+    grunt.registerTask('build', ['clean', 'sass', 'postcss', 'csso']);
 };
