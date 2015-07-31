@@ -7,9 +7,41 @@ module.exports = function(grunt) {
     grunt.initConfig({
         config: {
             distDir: 'dist',
+            examplesDir: 'examples',
+            scriptsDir: 'scripts',
             stylesDir: 'styles'
         },
+        babel: {
+            options: {
+                sourceMaps: 'inline',
+                stage: 0
+            },
+            dist: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= config.scriptsDir %>/',
+                    src: '*.js',
+                    dest: '<%= config.distDir %>/'
+                }]
+            }
+        },
         clean: ['.tmp', '<%= config.distDir %>'],
+        connect: {
+            options: {
+                hostname: 'localhost',
+                livereload: 35729,
+                port: 9000,
+            },
+            livereload: {
+                options: {
+                    base: [
+                        '<%= config.destDir %>',
+                        '<%= config.examplesDir %>'
+                    ],
+                    open: true
+                }
+            }
+        },
         csso: {
             options: {
                 banner: '/* coins-logon-widget */\n'
@@ -63,10 +95,24 @@ module.exports = function(grunt) {
             sass: {
                 files: '<%= config.stylesDir %>/**/*.scss',
                 tasks: ['sass']
+            },
+            js: {
+                files: '<%= config.scriptsDir %>/**/*.js',
+                tasks: ['babel']
+            },
+            livereload: {
+                options: {
+                    livereload: '<%= connect.options.livereload %>'
+                },
+                files: [
+                    '<%= config.distDir %>/*.{css,js}',
+                    '<%= config.examplesDir %>/**/*'
+                ]
             }
         }
     });
 
-    grunt.registerTask('default', ['clean', 'sass', 'postcss', 'watch']);
-    grunt.registerTask('build', ['clean', 'sass', 'postcss', 'csso']);
+    grunt.registerTask('default', ['clean', 'sass', 'postcss', 'babel']);
+    grunt.registerTask('build', ['default', 'csso']);
+    grunt.registerTask('serve', ['default', 'connect', 'watch']);
 };
