@@ -1,0 +1,336 @@
+//
+// COINS Logon Widget styles.
+//
+
+//
+// COINS Logon Widget settings.
+//
+// @type map
+//
+$coins-logon-widget: (
+    border-radius: 5px,
+    font-family: (Trebuchet, 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif),
+    font-size: 14px,
+    font-weight: normal,
+    line-height: 1.5,
+    padding: (.5em 1em),
+    transition-duration: 100ms
+) !default;
+
+//
+// COINS Logon Widget colors.
+//
+// @type map
+//
+$coins-logon-widget-colors: (
+    active: #f5c464,
+    button-primary-background: #90b6bf,
+    button-primary-color: #fff,
+    button-secondary-background: #666,
+    button-secondary-color: #fff,
+    error: #e96a57,
+    input-background: #fff,
+    input-border: #666,
+    input-color: #222,
+    input-placeholder: #999,
+    label: #222,
+    success: #6cc5a7
+) !default;
+
+/// Micro clearfix
+///
+/// @access private
+/// @output Clearfix styles for the element
+@mixin -coins-logon-widget-clearfix {
+    &:before,
+    &:after {
+        content: ' ';
+        display: table;
+    }
+    &:after {
+        clear: both;
+    }
+}
+
+/* ==========================================================================
+   Form Elements
+   ========================================================================== */
+
+/**
+ * Form.
+ *
+ * The root `form` element.
+ */
+.coins-logon-widget-form {
+    @include -coins-logon-widget-clearfix;
+
+    font-family: map-get($coins-logon-widget, 'font-family');
+    font-size: map-get($coins-logon-widget, 'font-size');
+    font-weight: map-get($coins-logon-widget, 'font-weight');
+    line-height: map-get($coins-logon-widget, 'line-height');
+
+    /** Make children adhere to 'border-box' spacing */
+    *,
+    *:before,
+    *:after {
+        box-sizing: border-box;
+    }
+}
+
+/**
+ * Form Group.
+ *
+ * These serve as a wrapper for `label`s and `input`s. Each should be wrapped
+ * with this class. These are also the targets for stateful classes.
+ */
+.coins-logon-widget-form-group {
+    margin-bottom: 1em;
+    position: relative;
+}
+
+/**
+ * Label.
+ */
+.coins-logon-widget-label {
+    color: map-get($coins-logon-widget-colors, 'label');
+    cursor: pointer;
+    display: block;
+    font-weight: inherit;
+    padding: 0 0 .25em;
+}
+
+/**
+ * Input.
+ */
+.coins-logon-widget-input {
+    background: map-get($coins-logon-widget-colors, 'input-background');
+    border-radius: map-get($coins-logon-widget, 'border-radius');
+    border: thin solid map-get($coins-logon-widget-colors, 'input-border');
+    color: map-get($coins-logon-widget-colors, 'input-color');
+    display: block;
+    font-family: inherit;
+    font-size: 100%;
+    font-weight: inherit;
+    line-height: inherit;
+    padding: map-get($coins-logon-widget, 'padding');
+    transition: box-shadow map-get($coins-logon-widget, 'transition-duration');
+    width: 100%;
+
+    &:focus {
+        box-shadow: 0 0 0 .25em map-get($coins-logon-widget-colors, 'active');
+        outline: none;
+    }
+
+    /** Placeholder color */
+    $input-placeholder: map-get($coins-logon-widget-colors, 'input-placeholder');
+
+    &::-webkit-input-placeholder {
+        color: $input-placeholder;
+    }
+    &::-moz-placeholder {
+        color: $input-placeholder;
+    }
+    &:-ms-input-placeholder {
+        color: $input-placeholder;
+    }
+}
+
+/**
+ * Icons.
+ *
+ * These are used in conjunction with form states to provide an applicable icon
+ * to a form group.
+ */
+.coins-logon-widget-icon {
+    font-size: 100% * map-get($coins-logon-widget, 'line-height');
+    line-height: 1;
+    padding: .333em 0;
+    position: absolute;
+    right: 0;
+    text-align: center;
+    top: 0;
+    width: 1.5em;
+
+    &:after {
+        display: inline-block;
+    }
+
+    .coins-logon-widget-label:not(.coins-logon-widget-visuallyhidden) ~ & {
+        top: .75em * map-get($coins-logon-widget, 'line-height');
+    }
+}
+
+/**
+ * Input Message.
+ *
+ * Placed after the `input` inside the form group. Can be information relating
+ * to the `input`, or can be a stateful message.
+ */
+.coins-logon-widget-input-message {
+    display: block;
+    font-size: 80%;
+    line-height: 1.25;
+    margin: .333em 0 0;
+    padding-left: nth(map-get($coins-logon-widget, 'padding'), 2) / .8;
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+/**
+ * Button groups
+ *
+ * Wrapper for two or more buttons.
+ */
+.coins-logon-widget-button-group {
+    @include -coins-logon-widget-clearfix;
+
+    $horizontal-spacing: nth(map-get($coins-logon-widget, 'padding'), 2);
+
+    margin-bottom: -0.5 * $horizontal-spacing;
+
+    .coins-logon-widget-button {
+        float: left;
+        margin-right: 0.5 * $horizontal-spacing;
+        margin-bottom: 0.5 * $horizontal-spacing;
+    }
+}
+
+/**
+ * Base button.
+ *
+ * Basic button styling, required by every button. A modifier class ('primary'
+ * or 'secondary') is required for proper coloring.
+ */
+.coins-logon-widget-button {
+    border: thin solid transparent;
+    border-radius: map-get($coins-logon-widget, 'border-radius');
+    cursor: pointer;
+    display: inline-block;
+    font-family: inherit;
+    font-size: 100%;
+    font-weight: inherit;
+    line-height: inherit;
+    padding: map-get($coins-logon-widget, 'padding');
+    text-decoration: none;
+    transition-duration: map-get($coins-logon-widget, 'transition-duration');
+    transition-property: background, box-shadow, color;
+
+    &:focus {
+        box-shadow: 0 0 0 .2em map-get($coins-logon-widget-colors, 'active');
+        outline: none;
+    }
+}
+
+/**
+ * Button color modifiers.
+ */
+@each $variation in primary, secondary {
+    .coins-logon-widget-button-#{$variation} {
+        $background: map-get($coins-logon-widget-colors, 'button-#{$variation}-background');
+        $color: map-get($coins-logon-widget-colors, 'button-#{$variation}-color');
+        background: $background;
+        color: $color;
+
+        &:focus,
+        &:hover,
+        &:active {
+            background: darken($background, 10%);
+            color: $color;
+        }
+    }
+}
+
+/* ==========================================================================
+   Form States
+   ========================================================================== */
+
+%coins-logon-widget-form-group-state {
+    .coins-logon-widget-input {
+        padding-right: 2em;
+    }
+}
+/// Iterate over
+@each $state, $symbol in (error: '✘', success: '✔') {
+    .coins-logon-widget-form-group-#{$state} {
+        @extend %coins-logon-widget-form-group-state;
+
+        $color: map-get($coins-logon-widget-colors, $state);
+
+        .coins-logon-widget-input {
+            border-color: $color;
+        }
+        .coins-logon-widget-icon {
+            color: $color;
+
+            &:after {
+                content: $symbol;
+            }
+        }
+        .coins-logon-widget-input-message {
+            color: $color;
+        }
+    }
+}
+
+/* ==========================================================================
+   Helper Classes
+   ========================================================================== */
+
+/**
+ * Horizontal form.
+ *
+ * Apply to the root `form.coins-logon-widget-form` to make the form groups and
+ * button display horizontally.
+ */
+.coins-logon-widget-form-horizontal {
+    $horizontal-spacing: nth(map-get($coins-logon-widget, 'padding'), 2);
+
+    align-items: flex-start;
+    display: flex;
+    margin-right: -.5 * $horizontal-spacing;
+    margin-left: -.5 * $horizontal-spacing;
+
+    .coins-logon-widget-form-group {
+        flex-grow: 2;
+        margin-bottom: 0;
+        padding-right: .5 * $horizontal-spacing;
+        padding-left: .5 * $horizontal-spacing;
+    }
+    .coins-logon-widget-button {
+        flex-grow: 1;
+        margin-left: .5 * $horizontal-spacing;
+    }
+}
+
+/**
+ * Visually hidden.
+ *
+ * Hide content but make it accessible for screen readers.
+ * http://a11yproject.com/posts/how-to-hide-content/
+ */
+.coins-logon-widget-visuallyhidden {
+    position: absolute !important;
+    clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+    clip: rect(1px, 1px, 1px, 1px);
+    padding:0 !important;
+    border:0 !important;
+    height: 1px !important;
+    width: 1px !important;
+    overflow: hidden;
+}
+
+/**
+ * Align left.
+ */
+.coins-logon-widget-left {
+    float: left;
+}
+
+/**
+ * Align right.
+ */
+.coins-logon-widget-right {
+    float: right;
+}
