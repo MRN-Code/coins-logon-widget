@@ -9,7 +9,8 @@ module.exports = function(grunt) {
             distDir: 'dist',
             examplesDir: 'examples',
             scriptsDir: 'scripts',
-            stylesDir: 'styles'
+            stylesDir: 'styles',
+            tempDir: '.tmp'
         },
         babel: {
             options: {
@@ -20,6 +21,16 @@ module.exports = function(grunt) {
                 files: [{
                     expand: true,
                     cwd: '<%= config.scriptsDir %>/',
+                    src: '**/*.js',
+                    dest: '<%= config.tempDir %>/scripts/'
+                }]
+            }
+        },
+        browserify: {
+            dist: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= config.tempDir %>/scripts/',
                     src: '*.js',
                     dest: '<%= config.distDir %>/'
                 }]
@@ -87,6 +98,17 @@ module.exports = function(grunt) {
                 }]
             }
         },
+        uglify: {
+            options: {
+                mangle: true
+                // screwIE8: true
+            },
+            dist: {
+                files: {
+                    '<%= config.distDir %>/coins-logon-widget.min.js' : ['<%= config.distDir %>/*.js']
+                }
+            }
+        },
         watch: {
             css: {
                 files: '.tmp/*.css',
@@ -98,7 +120,7 @@ module.exports = function(grunt) {
             },
             js: {
                 files: '<%= config.scriptsDir %>/**/*.js',
-                tasks: ['babel']
+                tasks: ['babel', 'browserify']
             },
             livereload: {
                 options: {
@@ -112,7 +134,7 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('default', ['clean', 'sass', 'postcss', 'babel']);
-    grunt.registerTask('build', ['default', 'csso']);
+    grunt.registerTask('default', ['clean', 'sass', 'postcss', 'babel', 'browserify']);
+    grunt.registerTask('build', ['default', 'csso', 'uglify']);
     grunt.registerTask('serve', ['default', 'connect', 'watch']);
 };
