@@ -43,6 +43,12 @@
     </head>
     <body>
         <h1>COINS Logon Widget</h1>
+
+        <h2>JS-Generated Form</h2>
+        <div class="login-form">
+            <div id="my-widget"></div>
+        </div><!-- .login-form -->
+
         <h2>Regular Form</h2>
         <div class="login-form">
             <div data-coins-logon-widget="">
@@ -181,5 +187,19 @@
                 </form>
             </div>
         </div><!-- .login-form -->
+
+        <script src="../dist/coins-logon-widget.js"></script>
+        <script>
+            (function() {
+                'use strict';
+
+                var myWidgetElement = document.getElementById('my-widget');
+                var myWidget = new CoinsLogonWidget(myWidgetElement, {});
+
+                myWidget.on('submit', function(event) {
+                    console.log('myWidget submitted', event);
+                });
+            })();
+        </script>
     </body>
 </html>

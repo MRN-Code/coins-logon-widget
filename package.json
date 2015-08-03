@@ -40,5 +40,10 @@
     "test": "testem ci",
     "validate": "echo ''",
     "lint": "jscs ./test/ ./src/ ./index.js"
+  },
+  "dependencies": {
+    "browser-cookies": "^1.0.8",
+    "lodash": "^3.10.0",
+    "wolfy87-eventemitter": "^4.2.11"
   }
 }
