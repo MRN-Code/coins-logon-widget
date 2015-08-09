@@ -34,6 +34,7 @@ $coins-logon-widget-colors: (
     input-color: #222,
     input-placeholder: #999,
     label: #222,
+    notification-color: #fff,
     success: #6cc5a7
 ) !default;
 
@@ -239,6 +240,23 @@ $coins-logon-widget-colors: (
             background: darken($background, 10%);
             color: $color;
         }
+    }
+}
+
+/* ==========================================================================
+   Notifications
+   ========================================================================== */
+
+.coins-logon-widget-notification {
+    border-radius: map-get($coins-logon-widget, 'border-radius');
+    color: map-get($coins-logon-widget-colors, 'notification-color');
+    margin-bottom: 1em;
+    padding: map-get($coins-logon-widget, 'padding');
+}
+
+@each $state in 'error', 'success' {
+    .coins-logon-widget-notification-#{$state} {
+        background: map-get($coins-logon-widget-colors, $state);
     }
 }
 
