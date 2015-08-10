@@ -261,6 +261,18 @@ $coins-logon-widget-colors: (
 }
 
 /* ==========================================================================
+   Status
+   ========================================================================== */
+
+.coins-logon-widget-status {
+    color: map-get($coins-logon-widget-colors, 'label');
+    float: left;
+    line-height: inherit;
+    margin: 0;
+    padding: .5em nth(map-get($coins-logon-widget, 'padding'), 2) 0 0;
+}
+
+/* ==========================================================================
    Form States
    ========================================================================== */
 
@@ -319,6 +331,18 @@ $coins-logon-widget-colors: (
     .coins-logon-widget-button {
         flex-grow: 1;
         margin-left: .5 * $horizontal-spacing;
+    }
+}
+
+/**
+ * Status form.
+ *
+ * Apply to the root `form.coins-logon-widget form` to add proper button styling
+ * for a form that displays logon status.
+ */
+.coins-logon-widget-form-status {
+    .coins-logon-widget-button {
+        float: left;
     }
 }
 

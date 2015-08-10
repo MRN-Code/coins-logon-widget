@@ -193,6 +193,15 @@
                 </form>
             </div>
         </div><!-- .login-form -->
+        <h2>Status/Log Out</h2>
+        <div class="login-form">
+            <div data-coins-logon-widget="">
+                <form method="post" action="/" novalidate class="coins-logon-widget-form">
+                    <p class="coins-logon-widget-status">Logged in as <strong>Pat Smith</strong></p>
+                    <button type="submit" class="coins-logon-widget-button coins-logon-widget-button-secondary">Log Out</button>
+                </form>
+            </div>
+        </div><!-- .login-form -->
 
         <script src="../dist/coins-logon-widget.js"></script>
         <script>
@@ -202,9 +211,11 @@
                 var myWidgetElement = document.getElementById('my-widget');
                 var myWidget = new CoinsLogonWidget(myWidgetElement, {});
 
-                myWidget.on('submit', function(event) {
-                    console.log('myWidget submitted', event);
-                });
+                // myWidget.on('submit', function(event) {
+                //     console.log('myWidget submitted', event);
+                // });
+
+                window.myWidget = myWidget;
             })();
         </script>
     </body>

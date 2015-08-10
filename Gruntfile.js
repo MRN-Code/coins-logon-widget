@@ -26,17 +26,22 @@ module.exports = function(grunt) {
                 }]
             }
         },
-        browserify: {
+        // browserify: {
+        //     dist: {
+        //         files: [{
+        //             expand: true,
+        //             cwd: '<%= config.tempDir %>/scripts/',
+        //             src: '*.js',
+        //             dest: '<%= config.distDir %>/'
+        //         }]
+        //     }
+        // },
+        clean: ['.tmp', '<%= config.distDir %>'],
+        concat: {
             dist: {
-                files: [{
-                    expand: true,
-                    cwd: '<%= config.tempDir %>/scripts/',
-                    src: '*.js',
-                    dest: '<%= config.distDir %>/'
-                }]
+
             }
         },
-        clean: ['.tmp', '<%= config.distDir %>'],
         connect: {
             options: {
                 hostname: 'localhost',
@@ -109,6 +114,30 @@ module.exports = function(grunt) {
                 }
             }
         },
+        umd: {
+            coinsLogonWidget: {
+                src: '<%= config.tempDir %>/scripts/coins-logon-widget.js',
+                objectToExport: 'CoinsLogonWidget',
+                amdModuleId: 'coinslogonwidget',
+                deps: {
+                    'default': ['EventEmitter', 'assign', 'forEach', 'uniqueId'],
+                    amd: ['eventemitter', 'lodash/object/assign', 'lodash/collection/forEach', 'lodash/utility/uniqueId'],
+                    cjs: ['wolfy87-eventemitter', 'lodash/object/assign', 'lodash/collection/forEach', 'lodash/utility/uniqueId'],
+                    global: ['EventEmitter', '_.assign', '_.forEach', '_.uniqueId']
+                }
+            }
+            // coinsLogonWidgetAuth: {
+            //     src: '<%= config.tempDir %>/scripts/coins-logon-widget-auth.js',
+            //     objectToExport: 'Auth',
+            //     amdModuleId: 'coinslogonwidgetauth',
+            //     deps: {
+            //         'default': ['cookies'],
+            //         amd: ['browsercookies'],
+            //         cjs: ['browser-cookies'],
+            //         global: ['cookies']
+            //     }
+            // }
+        },
         watch: {
             css: {
                 files: '.tmp/*.css',
@@ -120,7 +149,7 @@ module.exports = function(grunt) {
             },
             js: {
                 files: '<%= config.scriptsDir %>/**/*.js',
-                tasks: ['babel', 'browserify']
+                tasks: ['babel', 'umd', 'browserify']
             },
             livereload: {
                 options: {
@@ -134,7 +163,7 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('default', ['clean', 'sass', 'postcss', 'babel', 'browserify']);
+    grunt.registerTask('default', ['clean', 'sass', 'postcss', 'babel', 'umd']);
     grunt.registerTask('build', ['default', 'csso', 'uglify']);
     grunt.registerTask('serve', ['default', 'connect', 'watch']);
 };

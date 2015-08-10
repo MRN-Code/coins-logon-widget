@@ -1,8 +1,15 @@
-/* jshint esnext:true */
-import { toByteArray as base64 } from 'base64-js';
-import { api } from '../config';
-import cookies from 'browser-cookies';
-import fetch from 'whatwg-fetch';
+/* jshint esnext:true, global cookies */
+
+/**
+ * @todo  Move configuration, keys and cookie options out of module into a
+ *        separate config file. Possibly inject configuration into `Auth`.
+ */
+const config = {
+    protocol: 'http',
+    host: 'localhost',
+    port: 3000,
+    endpoint: '/auth'
+};
 
 const AUTH_STORAGE_KEY = 'coins-auth';
 const AUTH_COOKIE_NAME = 'coins-auth';
@@ -18,6 +25,35 @@ const cookieOptions = {
     secure: true
 };
 
+var Auth = {
+    check: function(id) {
+        return fetch(getApiUrl(`/cookies/${id}`))
+            .then(checkStatus);
+    },
+    login: function(username, password) {
+        return fetch(getApiUrl('/keys'), {
+            method: 'post',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: btoa(username),
+                password: btoa(password)
+            })
+        })
+            .then(checkStatus)
+            .then(setCredentials);
+    },
+    logout: function(id) {
+        return fetch(getApiUrl(`/keys/${id}`), {
+            method: 'delete'
+        })
+            .then(checkStatus)
+            .then(clearCredentials);
+    }
+};
+
 /**
  * Add a forward slash to string.
  */
@@ -29,8 +65,9 @@ function forwardSlashIt(string) {
  * Get API URL.
  */
 function getApiUrl(endpoint) {
-    let url = `${api.protocol}://${api.host}` + api.port ? `:${api.port}` : '';
-    return url + api.endpoint + forwardSlashIt(endpoint);
+    let url = `${config.protocol}://${config.host}`;
+    url += (config.port ? `:${config.port}` : '');
+    return url + config.endpoint + forwardSlashIt(endpoint);
 }
 
 /**
@@ -80,33 +117,4 @@ function checkStatus(response) {
         error.response = response;
         throw error;
     }
-}
-
-export function check(id) {
-    return fetch(getApiUrl(`/cookies/${id}`))
-        .then(checkStatus);
-}
-
-export function login(username, password) {
-    return fetch(getApiUrl('/keys'), {
-        method: 'post',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            username: base64(username),
-            password: base64(password)
-        })
-    })
-        .then(checkStatus)
-        .then(setCredentials);
-}
-
-export function logout(id) {
-    return fetch(getApiUrl(`/keys/${id}`), {
-        method: 'delete'
-    })
-        .then(checkStatus)
-        .then(clearCredentials);
 }
