@@ -1,17 +1,47 @@
-/* global uniqueId */
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define(['deepmerge/index', 'unique-number'], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(
+            require('deepmerge'),
+            require('unique-number')
+        );
+    } else {
+        // Browser globals (root is window)
+        root.CoinsLogonWidget = root.CoinsLogonWidget || {};
+        root.CoinsLogonWidget.FormGroup = factory(
+            root.deepmerge,
+            root.UniqueNumber
+        );
+    }
+}(this, function (assign, UniqueNumber) {
+    var uniqueNumber = new UniqueNumber();
 
-class FormGroup {
-    constructor(options) {
+    function uniqueId(string) {
+        if (typeof string !== 'string') {
+            string = '';
+        }
+        return string + uniqueNumber.generate();
+    }
+
+    function FormGroup(options) {
+        options = options || {};
+
         this.options = assign({}, FormGroup.DEFAULTS, options);
         this.element = this._getFormElements();
         this.setState();
     }
-    _getFormElements() {
-        const classNames = this.options.classNames;
-        const div = document.createElement('div');
-        const id = uniqueId('coins-logon-widget-');
-        const input = document.createElement('input');
-        const label = document.createElement('label');
+
+    FormGroup.prototype._getFormElements = function() {
+        var classNames = this.options.classNames;
+        var div = document.createElement('div');
+        var id = uniqueId('coins-logon-widget-');
+        var input = document.createElement('input');
+        var label = document.createElement('label');
 
         div.className = classNames.formGroup;
         label.className = classNames.label;
@@ -32,35 +62,40 @@ class FormGroup {
         div.appendChild(input);
 
         return div;
-    }
-    _getMessageElement(message) {
-        const span = document.createElement('span');
+    };
+
+    FormGroup.prototype._getMessageElement = function(message) {
+        var span = document.createElement('span');
 
         span.className = this.options.classNames.message;
         span.textContent = message;
 
         return span;
-    }
-    _getIconElement() {
-        const span = document.createElement('span');
+    };
+
+    FormGroup.prototype._getIconElement = function() {
+        var span = document.createElement('span');
 
         span.className = this.options.classNames.icon;
         span.setAttribute('aria-hidden', true);
 
         return span;
-    }
-    setState(state = '', message = '') {
-        const element = this.element;
-        const classNames = this.options.classNames;
-        const iconElement = element.querySelector(classNames.icon);
-        const messageElement = element.querySelector(classNames.message);
+    };
+
+    FormGroup.prototype.setState = function(state, message) {
+        var self = this;
+        var element = this.element;
+        var classNames = this.options.classNames;
+        var inputElement = element.querySelector('.' + classNames.input);
+        var iconElement = element.querySelector('.' + classNames.icon);
+        var messageElement = element.querySelector('.' + classNames.message);
 
         this.state = state;
 
         if (state) {
             // Add an icon if it doesn't exist
             if (!iconElement) {
-                element.querySelector('input').after(this._getIconElement());
+                element.appendChild(this._getIconElement());
             }
             // Add a message if needed, otherwise remove
             if (!messageElement && message) {
@@ -79,6 +114,11 @@ class FormGroup {
                 element.classList.remove(classNames.error);
                 element.classList.add(classNames.success);
             }
+
+            inputElement.addEventListener('keydown', function(event) {
+                self.clearState();
+                event.target.removeEventListener(event.type, arguments.callee);
+            }, false);
         } else {
             if (iconElement) {
                 iconElement.parentNode.removeChild(iconElement);
@@ -89,44 +129,64 @@ class FormGroup {
             element.classList.remove(classNames.error);
             element.classList.remove(classNames.success);
         }
-    }
-    clearState() {
+    };
+
+    FormGroup.prototype.clearState = function() {
         this.setState();
-    }
-    getName() {
+    };
+
+    FormGroup.prototype.getName = function() {
         return this.options.inputName;
-    }
-    getState() {
+    };
+
+    FormGroup.prototype.getState = function() {
         return this.state;
-    }
-    getValue() {
+    };
+
+    FormGroup.prototype.getValue = function() {
         return this.element.querySelector('input').value;
-    }
-}
+    };
 
-FormGroup.DEFAULTS = {
-    classNames: {
-        error: 'coins-logon-widget-form-group-error',
-        formGroup: 'coins-logon-widget-form-group',
-        icon: 'coins-logon-widget-icon',
-        input: 'coins-logon-widget-input',
-        label: 'coins-logon-widget-label',
-        message: 'coins-logon-widget-input-message',
-        success: 'coins-logon-widget-form-group-success'
-    },
-    inputName: 'name',
-    labelText: 'Name:',
-    placeholder: 'Ex: Pat Smith',
-    required: true,
-    type: 'text',
-    validate: function() {
-        const value = this.getValue();
+    FormGroup.prototype.validate = function() {
+        var value = this.getValue();
+        var validator = this.options.validate;
+        var isValid;
 
-        if (value.trim === '') {
-            this.setState('error', 'Field empty!');
-            return false;
+        if (this.options.required && validator instanceof Function) {
+            isValid = validator(value);
+
+            if (isValid !== true) {
+                this.setState('error', isValid);
+                return false;
+            }
         }
 
         return true;
-    }
-};
+    };
+
+    FormGroup.DEFAULTS = {
+        classNames: {
+            error: 'coins-logon-widget-form-group-error',
+            formGroup: 'coins-logon-widget-form-group',
+            icon: 'coins-logon-widget-icon',
+            input: 'coins-logon-widget-input',
+            label: 'coins-logon-widget-label',
+            message: 'coins-logon-widget-input-message',
+            success: 'coins-logon-widget-form-group-success'
+        },
+        inputName: 'name',
+        labelText: 'Name:',
+        placeholder: 'Ex: Pat Smith',
+        required: true,
+        type: 'text',
+        validate: function(value) {
+            if (value.trim() === '') {
+                return 'Field empty!';
+            }
+
+            return true;
+        }
+    };
+
+    return FormGroup;
+}));

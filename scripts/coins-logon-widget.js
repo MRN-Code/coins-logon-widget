@@ -1,8 +1,49 @@
-/* jshint esnext:true, global EventEmitter,Form,FormGroup,assign,forEach,uniqueId */
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([
+            'wolfy87-eventemitter/eventemitter',
+            'deepmerge/index',
+            'augment/augment',
+            './lib/auth',
+            './lib/form',
+            './lib/form-group'
+        ], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like environments that support module.exports,
+        // like Node.
+        module.exports = factory(
+            require('wolfy87-eventemitter'),
+            require('deepmerge'),
+            require('augment'),
+            require('./lib/auth'),
+            require('./lib/form'),
+            require('./lib/form-group')
+        );
+    } else {
+        // Browser globals (root is window)
+        root.CoinsLogonWidget = factory(
+            EventEmitter,
+            deepmerge,
+            augment,
+            root.CoinsLogonWidget.Auth,
+            root.CoinsLogonWidget.Form,
+            root.CoinsLogonWidget.FormGroup
+        );
+    }
+}(this, function (
+    EventEmitter,
+    assign,
+    augment,
+    Auth,
+    Form,
+    FormGroup
+) {
+    'use strict';
 
-class CoinsLogonWidget extends EventEmitter {
-    constructor(element, options = {}) {
-        super();
+    function CoinsLogonWidget(element, options) {
+        EventEmitter.call(this);
 
         if (!element) {
             throw new Error('Element required');
@@ -12,203 +53,163 @@ class CoinsLogonWidget extends EventEmitter {
             throw new Error('Expected element to be a DOM node');
         }
 
+        options = options || {};
+
         this.element = element;
         this.options = assign({}, CoinsLogonWidget.DEFAULTS, options);
 
         this._setElements();
         this._setEvents();
     }
-    _setElements() {
-        const form = new Form();
-        const formGroups = [{
-            inputName: 'username',
-            labelText: 'Username:'
-        }, {
-            inputName: 'password',
-            labelText: 'Password:',
-            type: 'password'
-        }].map(options => new FormGroup(options));
+
+    // Inherit from `EventEmitter`
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain#Example
+    CoinsLogonWidget.prototype = Object.create(EventEmitter.prototype);
+    CoinsLogonWidget.prototype.constructor = CoinsLogonWidget;
+
+    CoinsLogonWidget.prototype._setElements = function() {
+        var self = this;
+
+        this.form = new Form();
+        this.formGroups = this.options.formGroups
+            .map(function (options) {
+                return new FormGroup(options);
+            })
+            .reverse();
 
         // Make sure there's no children
         this.element.innerHTML = '';
 
+        this.element.className = this.options.classNames.root;
 
-        this.element.appendChild(formElement);
-    }
-    _setEvents() {
-        const form = this.element.querySelector('form');
-        const inputs = this.element.querySelectorAll('input');
-
-        form.addEventListener('submit', this.onSubmit, false);
-        this.element.on('error', this.onError);
-
-        'blur focus keydown keypress keyup'.split(' ').forEach(eventType => {
-            forEach(inputs, input => {
-                input.addEventListener(eventType, event => {
-                    this.emit(eventType, event);
-                }, false);
-            });
+        // Add elements to the DOM
+        this.element.appendChild(this.form.element);
+        this.formGroups.forEach(function(formGroup) {
+            var formElement = self.form.element;
+            formElement.insertBefore(formGroup.element, formElement.firstChild);
         });
-    }
-    onError(error) {
-        let message = error.message || error.toString();
+    };
+
+    CoinsLogonWidget.prototype._setEvents = function() {
+        var self = this;
+        var form = this.element.querySelector('form');
+        var inputs = this.element.querySelectorAll('input');
+
+        form.addEventListener('submit', function(event) {
+            self.onSubmit(event);
+        }, false);
+        this.on('error', this.onError);
+
+        'blur focus keydown keypress keyup'.split(' ').forEach(function(eventType) {
+            for (var i = 0, il = inputs.length; i < il; i++) {
+                inputs[i].addEventListener(
+                    eventType,
+                    self.emit.bind(self, eventType, event),
+                    false
+                );
+
+                //         function(event) {
+                //     self.emit(eventType, event);
+                // }, false);
+            }
+        });
+    };
+
+    CoinsLogonWidget.prototype.onError = function(error) {
+        var message = error.message || error.toString();
         this.emit('error', error);
         //TODO: Change component's `setNotification` parameters to make more sense
         this.form.setNotification(message, true);
-    }
-    onSubmit(event) {
+    };
+
+    CoinsLogonWidget.prototype.onSubmit = function(event) {
         event.preventDefault();
 
         this.emit('submit', event);
 
-        let errors;
+        var errors;
 
-        this.formGroups.forEach(formGroup => {
-            const isRequired = formGroup.options.required;
-            const validate = formGroup.options.validate;
-            let isValid;
+        this.formGroups.forEach(function(formGroup) {
+            var isValid = formGroup.validate();
 
-            if (isRequired && validate instanceof Function) {
-                isValid = validate();
-            }
-
+            //TODO: emit validation error events
             if (!isValid) {
                 errors = true;
             }
         });
 
-        // if (!errors) {
-        //     this.emit('submitted');
-        //     this.makeRequest();
-        // } else {
-        //     this.emit('validationError', {});
-        // }
-    }
-    // makeRequest() {
-    //     const inputs = this.element.getElementsByTagName('input');
-    //     const username = inputs[0].value;
-    //     const password = inputs[1].value;
-    //
-    //     auth.login(username, password)
-    //         .then(response => {
-    //             console.log(response);
-    //         })
-    //         .catch(error => console.error(error));
-    // }
-}
+        if (!errors) {
+            this.emit('submitted', event);
+            //TODO: Make authentication pluggable
+            this.login();
+        }
+    };
 
-CoinsLogonWidget.DEFAULTS = {
-    classNames: {
-        root: 'coins-logon-widget',
-        form: 'coins-logon-widget-form',
-        input: 'coins-logon-widget-input',
-        label: 'coins-logon-widget-label',
-        formGroup: 'coins-logon-widget-form-group',
-        icon: 'coins-logon-widget-icon',
-        message: 'coins-logon-widget-input-message',
-        buttonGroup: 'coins-logon-widget-button-group',
-        button: 'coins-logon-widget-button',
-        buttonPrimary: 'coins-logon-widget-button-primary',
-        buttonSecondary: 'coins-logon-widget-button-secondary',
-        error: 'coins-logon-widget-form-group-error',
-        success: 'coins-logon-widget-form-group-success'
-    },
-    formGroups: [{
-        inputName: 'username',
-        labelText: 'Username:',
-        required: true
-    }, {
-        inputName: 'password',
-        labelText: 'Password:',
-        required: true,
-        type: 'password'
-    }],
-    messages: {
-        error: 'Field empty'
-    }
-};
+    CoinsLogonWidget.prototype.login = function() {
+        var self = this;
+        var formData = this.formGroups.reduce(function(prev, curr) {
+            var name = curr.getName();
+            var value = curr.getValue();
 
-// Get the entire form
-function formFactory({
-    action,
-    buttonText,
-    classNames,
-    formGroups,
-    method
-}) {
-    const form = document.createElement('form');
-    const button = document.createElement('button');
-    const formGroupsElements = formGroups
-        .map(formGroup => {
-            formGroup.id = uniqueId('coins-logon-widget-');
-            formGroup.classNames = classNames;
-            return formGroup;
-        })
-        .map(formGroupFactory);
+            prev[name] = value;
 
-    form.action = action;
-    form.className = classNames.form;
-    form.method = method;
-    button.className = `${classNames.button} ${classNames.buttonPrimary}`;
-    //TODO: Don't hard code button's text
-    button.textContent = 'Log In';
-    button.type = 'submit';
+            return prev;
+        }, {});
 
-    formGroupsElements.forEach(formGroup => form.appendChild(formGroup));
-    form.appendChild(button);
+        Auth.login(formData.username, formData.password)
+            .then(function(response) {
+                self.emit('login', response);
+                console.log(response);
+            })
+            .catch(function(error) {
+                self.emit('error', error);
+            });
+    };
 
-    return form;
-}
+    CoinsLogonWidget.prototype.logout = function() {
+        var self = this;
 
-// Get a single form group
-function formGroupFactory({
-    classNames,
-    id,
-    inputName,
-    labelText,
-    placeholder,
-    required,
-    type = 'text'
-}) {
-    const div = document.createElement('div');
-    const label = document.createElement('label');
-    const input = document.createElement('input');
+        Auth.logout()
+            .then(function(response) {
+                self.emit('logout', response);
+            })
+            .catch(function(error) {
+                self.emit('error', error);
+            });
+    };
 
-    div.className = classNames.formGroup;
-    label.className = classNames.label;
-    label.setAttribute('for', id);
-    label.textContent = labelText;
-    input.className = classNames.input;
-    input.id = id;
-    input.name = inputName;
-    if (placeholder) {
-        input.placeholder = placeholder;
-    }
-    if (required) {
-        input.setAttribute('aria-required', true);
-    }
-    input.type = type;
+    CoinsLogonWidget.DEFAULTS = {
+        classNames: {
+            root: 'coins-logon-widget',
+            form: 'coins-logon-widget-form',
+            input: 'coins-logon-widget-input',
+            label: 'coins-logon-widget-label',
+            formGroup: 'coins-logon-widget-form-group',
+            icon: 'coins-logon-widget-icon',
+            message: 'coins-logon-widget-input-message',
+            buttonGroup: 'coins-logon-widget-button-group',
+            button: 'coins-logon-widget-button',
+            buttonPrimary: 'coins-logon-widget-button-primary',
+            buttonSecondary: 'coins-logon-widget-button-secondary',
+            error: 'coins-logon-widget-form-group-error',
+            success: 'coins-logon-widget-form-group-success'
+        },
+        formGroups: [{
+            inputName: 'username',
+            labelText: 'Username:',
+            placeholder: ''
+        }, {
+            inputName: 'password',
+            labelText: 'Password:',
+            placeholder: '',
+            type: 'password'
+        }],
+        messages: {
+            error: 'Field empty'
+        }
+    };
 
-    div.appendChild(label);
-    div.appendChild(input);
+    window.CoinsLogonWidget = CoinsLogonWidget;
 
-    return div;
-}
-
-function formMessageFactory({ classNames, message }) {
-    const span = document.createElement('span');
-
-    span.className = classNames.message;
-    span.textContent = message;
-
-    return span;
-}
-
-function formIconFactory({ classNames }) {
-    const span = document.createElement('span');
-
-    span.className = classNames.icon;
-    span.setAttribute('aria-hidden', true);
-
-    return span;
-}
+    return CoinsLogonWidget;
+}));

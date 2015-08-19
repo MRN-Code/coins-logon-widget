@@ -208,14 +208,16 @@
             (function() {
                 'use strict';
 
-                var myWidgetElement = document.getElementById('my-widget');
-                var myWidget = new CoinsLogonWidget(myWidgetElement, {});
+                var myWidget = new CoinsLogonWidget(
+                    document.getElementById('my-widget'),
+                    {
 
-                // myWidget.on('submit', function(event) {
-                //     console.log('myWidget submitted', event);
-                // });
-
-                window.myWidget = myWidget;
+                    }
+                );
+                myWidget.on('login', function() {
+                    console.log('Logged in!');
+                    //location.reload();
+                });
             })();
         </script>
     </body>

@@ -12,36 +12,14 @@ module.exports = function(grunt) {
             stylesDir: 'styles',
             tempDir: '.tmp'
         },
-        babel: {
-            options: {
-                sourceMaps: 'inline',
-                stage: 0
-            },
+        browserify: {
             dist: {
-                files: [{
-                    expand: true,
-                    cwd: '<%= config.scriptsDir %>/',
-                    src: '**/*.js',
-                    dest: '<%= config.tempDir %>/scripts/'
-                }]
+                files: {
+                    '<%= config.distDir %>/coins-logon-widget.js': '<%= config.scriptsDir %>/coins-logon-widget.js'
+                }
             }
         },
-        // browserify: {
-        //     dist: {
-        //         files: [{
-        //             expand: true,
-        //             cwd: '<%= config.tempDir %>/scripts/',
-        //             src: '*.js',
-        //             dest: '<%= config.distDir %>/'
-        //         }]
-        //     }
-        // },
-        clean: ['.tmp', '<%= config.distDir %>'],
-        concat: {
-            dist: {
-
-            }
-        },
+        clean: ['<%= config.tempDir %>', '<%= config.distDir %>'],
         connect: {
             options: {
                 hostname: 'localhost',
@@ -51,6 +29,7 @@ module.exports = function(grunt) {
             livereload: {
                 options: {
                     base: [
+                        'node_modules',
                         '<%= config.destDir %>',
                         '<%= config.examplesDir %>'
                     ],
@@ -103,6 +82,22 @@ module.exports = function(grunt) {
                 }]
             }
         },
+        requirejs: {
+            dist: {
+                options: {
+                    baseUrl: 'node_modules',
+                    include: [
+                        'coins-logon-widget/scripts/coins-logon-widget'
+                    ],
+                    out: 'dist/coins-logon-widget.js',
+                    optimize: 'none',
+                    paths: {
+                        'coins-logon-widget': '../',
+                        'unique-number': 'unique-number/index'
+                    }
+                }
+            }
+        },
         uglify: {
             options: {
                 mangle: true
@@ -113,30 +108,6 @@ module.exports = function(grunt) {
                     '<%= config.distDir %>/coins-logon-widget.min.js' : ['<%= config.distDir %>/*.js']
                 }
             }
-        },
-        umd: {
-            coinsLogonWidget: {
-                src: '<%= config.tempDir %>/scripts/coins-logon-widget.js',
-                objectToExport: 'CoinsLogonWidget',
-                amdModuleId: 'coinslogonwidget',
-                deps: {
-                    'default': ['EventEmitter', 'assign', 'forEach', 'uniqueId'],
-                    amd: ['eventemitter', 'lodash/object/assign', 'lodash/collection/forEach', 'lodash/utility/uniqueId'],
-                    cjs: ['wolfy87-eventemitter', 'lodash/object/assign', 'lodash/collection/forEach', 'lodash/utility/uniqueId'],
-                    global: ['EventEmitter', '_.assign', '_.forEach', '_.uniqueId']
-                }
-            }
-            // coinsLogonWidgetAuth: {
-            //     src: '<%= config.tempDir %>/scripts/coins-logon-widget-auth.js',
-            //     objectToExport: 'Auth',
-            //     amdModuleId: 'coinslogonwidgetauth',
-            //     deps: {
-            //         'default': ['cookies'],
-            //         amd: ['browsercookies'],
-            //         cjs: ['browser-cookies'],
-            //         global: ['cookies']
-            //     }
-            // }
         },
         watch: {
             css: {
@@ -149,7 +120,7 @@ module.exports = function(grunt) {
             },
             js: {
                 files: '<%= config.scriptsDir %>/**/*.js',
-                tasks: ['babel', 'umd', 'browserify']
+                tasks: ['requirejs']
             },
             livereload: {
                 options: {
@@ -163,7 +134,7 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('default', ['clean', 'sass', 'postcss', 'babel', 'umd']);
+    grunt.registerTask('default', ['clean', 'sass', 'postcss', 'requirejs']);
     grunt.registerTask('build', ['default', 'csso', 'uglify']);
     grunt.registerTask('serve', ['default', 'connect', 'watch']);
 };
