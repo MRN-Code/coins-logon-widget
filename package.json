@@ -29,10 +29,9 @@
   },
   "scripts": {},
   "dependencies": {
-    "augment": "^4.3.0",
+    "@fdaciuk/ajax": "fdaciuk/ajax#v0.0.7",
     "cookies-js": "^1.2.1",
-    "deepmerge": "^0.2.10",
-    "object-assign": "^3.0.0",
+    "es6-object-assign": "^1.0.1",
     "unique-number": "^2.0.1",
     "wolfy87-eventemitter": "^4.2.11"
   }

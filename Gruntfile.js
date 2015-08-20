@@ -92,7 +92,9 @@ module.exports = function(grunt) {
                     out: 'dist/coins-logon-widget.js',
                     optimize: 'none',
                     paths: {
+                        'Ajax': '@fdaciuk/ajax/dist/ajax.min',
                         'coins-logon-widget': '../',
+                        'es6-object-assign': 'es6-object-assign/dist/object-assign',
                         'unique-number': 'unique-number/index'
                     }
                 }

@@ -2,21 +2,21 @@
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define([
-            'wolfy87-eventemitter/eventemitter',
-            'deepmerge/index',
-            'augment/augment',
+            'wolfy87-eventemitter/EventEmitter',
+            'es6-object-assign',
             './lib/auth',
             './lib/form',
             './lib/form-group'
-        ], factory);
+        ], function(EventEmitter, ObjectAssign, Auth, Form, FormGroup) {
+            return factory(EventEmitter, ObjectAssign.assign, Auth, Form, FormGroup);
+        });
     } else if (typeof module === 'object' && module.exports) {
         // Node. Does not work with strict CommonJS, but
         // only CommonJS-like environments that support module.exports,
         // like Node.
         module.exports = factory(
             require('wolfy87-eventemitter'),
-            require('deepmerge'),
-            require('augment'),
+            require('es6-object-assign').assign,
             require('./lib/auth'),
             require('./lib/form'),
             require('./lib/form-group')
@@ -24,9 +24,8 @@
     } else {
         // Browser globals (root is window)
         root.CoinsLogonWidget = factory(
-            EventEmitter,
-            deepmerge,
-            augment,
+            root.EventEmitter,
+            root.ObjectAssign.assign,
             root.CoinsLogonWidget.Auth,
             root.CoinsLogonWidget.Form,
             root.CoinsLogonWidget.FormGroup
@@ -35,7 +34,6 @@
 }(this, function (
     EventEmitter,
     assign,
-    augment,
     Auth,
     Form,
     FormGroup

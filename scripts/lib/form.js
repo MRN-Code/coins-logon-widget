@@ -1,16 +1,18 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['deepmerge/index'], factory);
+        define(['es6-object-assign'], function(ObjectAssign) {
+            return factory(ObjectAssign.assign);
+        });
     } else if (typeof module === 'object' && module.exports) {
         // Node. Does not work with strict CommonJS, but
         // only CommonJS-like environments that support module.exports,
         // like Node.
-        module.exports = factory(require('deepmerge'));
+        module.exports = factory(require('es6-object-assign').assign);
     } else {
         // Browser globals (root is window)
         root.CoinsLogonWidget = root.CoinsLogonWidget || {};
-        root.CoinsLogonWidget.Form = factory(deepmerge);
+        root.CoinsLogonWidget.Form = factory(root.ObjectAssign.assign);
     }
 }(this, function (assign) {
     'use strict';

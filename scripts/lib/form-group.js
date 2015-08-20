@@ -1,20 +1,25 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['deepmerge/index', 'unique-number'], factory);
+        define(
+            ['es6-object-assign', 'unique-number'],
+            function(ObjectAssign, UniqueNumber) {
+                return factory(ObjectAssign.assign, UniqueNumber);
+            }
+        );
     } else if (typeof module === 'object' && module.exports) {
         // Node. Does not work with strict CommonJS, but
         // only CommonJS-like environments that support module.exports,
         // like Node.
         module.exports = factory(
-            require('deepmerge'),
+            require('es6-object-assign').assign,
             require('unique-number')
         );
     } else {
         // Browser globals (root is window)
         root.CoinsLogonWidget = root.CoinsLogonWidget || {};
         root.CoinsLogonWidget.FormGroup = factory(
-            root.deepmerge,
+            root.ObjectAssign.assign,
             root.UniqueNumber
         );
     }

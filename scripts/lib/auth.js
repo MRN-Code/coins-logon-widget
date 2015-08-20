@@ -1,18 +1,21 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['cookies-js/dist/cookies'], factory);
+        define(['cookies-js/dist/cookies', 'Ajax'], factory);
     } else if (typeof module === 'object' && module.exports) {
         // Node. Does not work with strict CommonJS, but
         // only CommonJS-like environments that support module.exports,
         // like Node.
-        module.exports = factory(require('cookies-js'));
+        module.exports = factory(
+            require('cookies-js'),
+            require('@fdaciuk/ajax')
+        );
     } else {
         // Browser globals (root is window)
         root.CoinsLogonWidget = root.CoinsLogonWidget || {};
-        root.CoinsLogonWidget.Auth = factory(root.cookies);
+        root.CoinsLogonWidget.Auth = factory(root.cookies, root.Ajax);
     }
-}(this, function (cookies) {
+}(this, function (cookies, Ajax) {
     'use strict';
 
     /**
@@ -29,32 +32,22 @@
     var AUTH_STORAGE_KEY = 'coins-auth';
     var AUTH_COOKIE_KEY = 'CAS_Auth_User';
 
+    var ajax =  new Ajax();
+
     var Auth = {
         check: function() {
-            return fetch(getApiUrl('/cookies/' + cookies.get(AUTH_COOKIE_KEY)))
-                .then(checkStatus);
+            return ajax.get(
+                getApiUrl('/cookies/' + cookies.get(AUTH_COOKIE_KEY))
+            );
         },
         login: function(username, password) {
-            return fetch(getApiUrl('/keys'), {
-                method: 'post',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    username: btoa(username),
-                    password: btoa(password)
-                })
-            })
-                .then(checkStatus)
-                .then(setCredentials);
+            return ajax.post(getApiUrl('/keys'), {
+                username: btoa(username),
+                password: btoa(password)
+            });
         },
-        logout: function(id) {
-            return fetch(getApiUrl('/keys/' + id), {
-                method: 'delete'
-            })
-                .then(checkStatus)
-                .then(clearCredentials);
+        logout: function() {
+            return ajax.deletefetch(getApiUrl('/keys/' + id));
         }
     };
 
