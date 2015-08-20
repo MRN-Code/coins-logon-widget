@@ -155,11 +155,11 @@
         }, {});
 
         Auth.login(formData.username, formData.password)
-            .then(function(response) {
+            .done(function(response) {
                 self.emit('login', response);
                 console.log(response);
             })
-            .catch(function(error) {
+            .error(function(error) {
                 self.emit('error', error);
             });
     };
@@ -168,10 +168,10 @@
         var self = this;
 
         Auth.logout()
-            .then(function(response) {
+            .done(function(response) {
                 self.emit('logout', response);
             })
-            .catch(function(error) {
+            .error(function(error) {
                 self.emit('error', error);
             });
     };
