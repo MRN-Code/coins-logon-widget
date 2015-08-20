@@ -100,15 +100,9 @@
 
         'blur focus keydown keypress keyup'.split(' ').forEach(function(eventType) {
             for (var i = 0, il = inputs.length; i < il; i++) {
-                inputs[i].addEventListener(
-                    eventType,
-                    self.emit.bind(self, eventType, event),
-                    false
-                );
-
-                //         function(event) {
-                //     self.emit(eventType, event);
-                // }, false);
+                inputs[i].addEventListener(function(event) {
+                    self.emit(eventType, event);
+                }, false);
             }
         });
     };
@@ -203,8 +197,6 @@
             error: 'Field empty'
         }
     };
-
-    window.CoinsLogonWidget = CoinsLogonWidget;
 
     return CoinsLogonWidget;
 }));
