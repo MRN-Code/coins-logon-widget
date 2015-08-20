@@ -66,11 +66,10 @@
             notification.classList.add(classNames.notificationSuccess);
         }
 
-        //TODO: fix
-        this.element.prepend(notification);
+        this.element.insertBefore(notification, this.element.firstChild);
     };
 
-    Form.clearNotification = function() {
+    Form.prototype.clearNotification = function() {
         var notification = this.element.querySelector(
             '.' + this.options.classNames.notification
         );
