@@ -115,15 +115,12 @@
 
     CoinsLogonWidget.prototype.onError = function(error) {
         var message = error.message || error.toString();
-        this.emit('error', error);
         //TODO: Change component's `setNotification` parameters to make more sense
         this.form.setNotification(message, true);
     };
 
     CoinsLogonWidget.prototype.onSubmit = function(event) {
         event.preventDefault();
-
-        this.emit('submit', event);
 
         var errors;
 
