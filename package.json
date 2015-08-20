@@ -15,12 +15,7 @@
   "homepage": "https://github.com/MRN-Code/coins-logon-widget#readme",
   "devDependencies": {
     "autoprefixer-core": "^5.2.1",
-    "babel-loader": "^5.3.1",
-    "babelify": "^6.1.3",
-    "browserify": "^11.0.1",
     "grunt": "^0.4.5",
-    "grunt-babel": "^5.0.1",
-    "grunt-browserify": "^4.0.0",
     "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-concat": "^0.5.1",
     "grunt-contrib-connect": "^0.11.0",
@@ -30,23 +25,15 @@
     "grunt-postcss": "^0.5.5",
     "grunt-requirejs": "^0.4.2",
     "grunt-sass": "^1.0.0",
-    "load-grunt-tasks": "^3.2.0",
-    "pre-commit": "^1.0.10",
-    "tape": "^4.0.1",
-    "testem": "^0.9.1"
+    "load-grunt-tasks": "^3.2.0"
   },
-  "scripts": {
-    "test": "testem ci",
-    "validate": "echo ''",
-    "lint": "jscs ./test/ ./src/ ./index.js"
-  },
+  "scripts": {},
   "dependencies": {
     "augment": "^4.3.0",
     "cookies-js": "^1.2.1",
     "deepmerge": "^0.2.10",
     "object-assign": "^3.0.0",
     "unique-number": "^2.0.1",
-    "whatwg-fetch": "^0.9.0",
     "wolfy87-eventemitter": "^4.2.11"
   }
 }
