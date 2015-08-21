@@ -110,7 +110,7 @@
     CoinsLogonWidget.prototype.onError = function(error) {
         var message = error.message || error.toString();
         //TODO: Change component's `setNotification` parameters to make more sense
-        this.form.setNotification(message, true);
+        this.form.setNotification(message, 'error');
     };
 
     CoinsLogonWidget.prototype.onSubmit = function(event) {
@@ -146,11 +146,12 @@
         }, {});
 
         Auth.login(formData.username, formData.password)
-            .done(function(response) {
+            .then(function(response) {
                 self.emit('login', response);
                 console.log(response);
             })
-            .error(function(error) {
+            .catch(function(error) {
+                console.error(error);
                 self.emit('error', error);
             });
     };
@@ -159,10 +160,11 @@
         var self = this;
 
         Auth.logout()
-            .done(function(response) {
+            .then(function(response) {
                 self.emit('logout', response);
             })
-            .error(function(error) {
+            .catch(function(error) {
+                console.error(error);
                 self.emit('error', error);
             });
     };

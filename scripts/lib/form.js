@@ -61,9 +61,9 @@
         notification.textContent = text;
 
         if (state === 'error') {
-            notification.classList.add(classNames.notificationError);
+            notification.classList.add(this.options.classNames.notificationError);
         } else if (state === 'success') {
-            notification.classList.add(classNames.notificationSuccess);
+            notification.classList.add(this.options.classNames.notificationSuccess);
         }
 
         this.element.insertBefore(notification, this.element.firstChild);
