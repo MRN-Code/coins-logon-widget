@@ -37,10 +37,6 @@
         },
         requestFn: function(options) {
             var body = options.body || {};
-            var headers = options.headers || {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                };
             var method = options.method || 'get';
             var url = options.uri || '';
 

@@ -6,9 +6,17 @@
             'es6-object-assign',
             './lib/auth',
             './lib/form',
-            './lib/form-group'
-        ], function(EventEmitter, ObjectAssign, Auth, Form, FormGroup) {
-            return factory(EventEmitter, ObjectAssign.assign, Auth, Form, FormGroup);
+            './lib/form-group',
+            './lib/logout'
+        ], function(EventEmitter, ObjectAssign, Auth, Form, FormGroup, Logout) {
+            return factory(
+                EventEmitter,
+                ObjectAssign.assign,
+                Auth,
+                Form,
+                FormGroup,
+                Logout)
+            ;
         });
     } else if (typeof module === 'object' && module.exports) {
         // Node. Does not work with strict CommonJS, but
@@ -19,7 +27,8 @@
             require('es6-object-assign').assign,
             require('./lib/auth'),
             require('./lib/form'),
-            require('./lib/form-group')
+            require('./lib/form-group'),
+            require('./lib/logout')
         );
     } else {
         // Browser globals (root is window)
@@ -28,7 +37,8 @@
             root.ObjectAssign.assign,
             root.CoinsLogonWidget.Auth,
             root.CoinsLogonWidget.Form,
-            root.CoinsLogonWidget.FormGroup
+            root.CoinsLogonWidget.FormGroup,
+            root.CoinsLogonWidget.Logout
         );
     }
 }(this, function (
@@ -36,7 +46,8 @@
     assign,
     Auth,
     Form,
-    FormGroup
+    FormGroup,
+    Logout
 ) {
     'use strict';
 
@@ -132,6 +143,14 @@
             //TODO: Make authentication pluggable
             this.login();
         }
+    };
+
+    CoinsLogonWidget.prototype.onLogin = function(response) {
+
+    };
+
+    CoinsLogonWidget.prototype.onLogout = function(response) {
+
     };
 
     CoinsLogonWidget.prototype.login = function() {
