@@ -212,12 +212,11 @@
                 var myWidget = new CoinsLogonWidget(
                     document.getElementById('my-widget'),
                     {
-
+                        baseUrl: 'https://devcoin1.mrn.org:8443/api'
                     }
                 );
                 myWidget.on('login', function() {
                     console.log('Logged in!');
-                    //location.reload();
                 });
             })();
         </script>

@@ -51,6 +51,8 @@
 ) {
     'use strict';
 
+    var auth;
+
     function CoinsLogonWidget(element, options) {
         EventEmitter.call(this);
 
@@ -66,6 +68,10 @@
 
         this.element = element;
         this.options = assign({}, CoinsLogonWidget.DEFAULTS, options);
+
+        // Configure auth, SDK client
+        // TODO: Enable passing of more options
+        auth = Auth({ baseUrl: this.options.baseUrl });
 
         this._setElements();
         this._setEvents();
@@ -119,7 +125,7 @@
     };
 
     CoinsLogonWidget.prototype.onError = function(error) {
-        var message = error.message || error.toString();
+        var message = error.message || error.toString() || 'Unknown error.';
         //TODO: Change component's `setNotification` parameters to make more sense
         this.form.setNotification(message, 'error');
     };
@@ -164,7 +170,7 @@
             return prev;
         }, {});
 
-        Auth.login(formData.username, formData.password)
+        auth.login(formData.username, formData.password)
             .then(function(response) {
                 self.emit('login', response);
                 console.log(response);
@@ -178,7 +184,7 @@
     CoinsLogonWidget.prototype.logout = function() {
         var self = this;
 
-        Auth.logout()
+        auth.logout()
             .then(function(response) {
                 self.emit('logout', response);
             })

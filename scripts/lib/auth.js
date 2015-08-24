@@ -3,15 +3,19 @@
         // AMD. Register as an anonymous module.
         define([
             'cookies-js/dist/cookies',
+            'es6-object-assign',
             'Ajax',
             'nodeapi/test/sdk/index'
-        ], factory);
+        ], function(cookies, ObjectAssign, Ajax, CoinsApiClient) {
+            return factory(cookies, ObjectAssign.assign, Ajax, CoinsApiClient);
+        });
     } else if (typeof module === 'object' && module.exports) {
         // Node. Does not work with strict CommonJS, but
         // only CommonJS-like environments that support module.exports,
         // like Node.
         module.exports = factory(
             require('cookies-js'),
+            require('es6-object-assign').assign,
             require('@fdaciuk/ajax'),
             require('nodeapi/test/sdk')
         );
@@ -20,18 +24,18 @@
         root.CoinsLogonWidget = root.CoinsLogonWidget || {};
         root.CoinsLogonWidget.Auth = factory(
             root.cookies,
+            root.ObjectAssign.assign,
             root.Ajax,
             root.CoinsApiClient
         );
     }
-}(this, function (cookies, Ajax, Client) {
+}(this, function (cookies, assign, Ajax, Client) {
     'use strict';
 
     var ajax =  new Ajax();
 
-    // Set up client
-    var client = Client({
-        baseUrl: 'https://devcoin1.mrn.org:8443/api',
+    var DEFAULTS = {
+        baseUrl: 'http://localhost:8443/api',
         formatResponseCallback: function(response) {
             return response;
         },
@@ -61,7 +65,16 @@
                     });
             });
         }
-    });
+    };
 
-    return client.auth;
+    return function(options) {
+        if (typeof options === 'undefined') {
+            options = {};
+        }
+
+        // Set up client
+        var client = Client(assign({}, DEFAULTS, options));
+
+        return client.auth;
+    };
 }));
