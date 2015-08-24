@@ -2,6 +2,20 @@
 
 _Injectable utility to manage browser authorization with COINS._
 
+## Use
+
+```js
+var widget = new CoinsLogonWidget(document.getElementById('logon-area'), {
+    baseUrl: 'http://localhost:9000/api'
+});
+
+// events
+widget.on('login:success', function() {});
+widget.on('login:error', function() {});
+widget.on('logout:success', function() {});
+widget.on('logout:error', function() {});
+```
+
 ## Project Setup
 
 1. Make sure you have [Node.js](https://nodejs.org/) or [io.js](https://iojs.org/en/index.html) installed on your machine.

@@ -113,7 +113,10 @@
         form.addEventListener('submit', function(event) {
             self.onSubmit(event);
         }, false);
-        this.on('error', this.onError);
+        this.on('login:error', this.onError);
+        this.on('logout:error', this.onError);
+        this.on('login:success', this.onLogin);
+        this.on('logout:success', this.onLogout);
 
         'blur focus keydown keypress keyup'.split(' ').forEach(function(eventType) {
             for (var i = 0, il = inputs.length; i < il; i++) {
@@ -128,6 +131,8 @@
         var message = error.message || error.toString() || 'Unknown error.';
         //TODO: Change component's `setNotification` parameters to make more sense
         this.form.setNotification(message, 'error');
+
+        console.error(error);
     };
 
     CoinsLogonWidget.prototype.onSubmit = function(event) {
@@ -151,12 +156,12 @@
         }
     };
 
-    CoinsLogonWidget.prototype.onLogin = function(response) {
-
+    CoinsLogonWidget.prototype.onLogin = function() {
+        console.log('Switch to logged in state');
     };
 
-    CoinsLogonWidget.prototype.onLogout = function(response) {
-
+    CoinsLogonWidget.prototype.onLogout = function() {
+        console.log('Switch to logged out state');
     };
 
     CoinsLogonWidget.prototype.login = function() {
@@ -172,12 +177,10 @@
 
         auth.login(formData.username, formData.password)
             .then(function(response) {
-                self.emit('login', response);
-                console.log(response);
+                self.emit('login:success', response);
             })
             .catch(function(error) {
-                console.error(error);
-                self.emit('error', error);
+                self.emit('login:error', error);
             });
     };
 
@@ -186,11 +189,10 @@
 
         auth.logout()
             .then(function(response) {
-                self.emit('logout', response);
+                self.emit('logout:success', response);
             })
             .catch(function(error) {
-                console.error(error);
-                self.emit('error', error);
+                self.emit('logout:error', error);
             });
     };
 
