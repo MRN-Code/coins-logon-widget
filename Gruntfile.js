@@ -4,6 +4,8 @@
 module.exports = function(grunt) {
     require('load-grunt-tasks')(grunt);
 
+    var NODEAPI_VERSION = grunt.file.readJSON('./node_modules/nodeapi/package.json').version;
+
     grunt.initConfig({
         config: {
             distDir: 'dist',
@@ -22,7 +24,7 @@ module.exports = function(grunt) {
         clean: ['<%= config.tempDir %>', '<%= config.distDir %>'],
         connect: {
             options: {
-                hostname: 'localhost',
+                hostname: 'localcoin.mrn.org',
                 livereload: 35729,
                 port: 9000,
             },
@@ -65,6 +67,14 @@ module.exports = function(grunt) {
                 }]
             },
         },
+        sed: {
+            version: {
+                pattern: '%NODEAPI_VERSION%',
+                replacement: NODEAPI_VERSION,
+                recursive: true,
+                path: '<%= config.distDir %>'
+            }
+        },
         sass: {
             options: {
                 sourceMap: true,
@@ -95,6 +105,8 @@ module.exports = function(grunt) {
                         'Ajax': '@fdaciuk/ajax/dist/ajax.min',
                         'coins-logon-widget': '../',
                         'es6-object-assign': 'es6-object-assign/dist/object-assign',
+                        'hawk': 'hawk/lib/browser',
+                        'rename-keys': 'rename-keys/index',
                         'unique-number': 'unique-number/index'
                     }
                 }
@@ -122,7 +134,7 @@ module.exports = function(grunt) {
             },
             js: {
                 files: '<%= config.scriptsDir %>/**/*.js',
-                tasks: ['requirejs']
+                tasks: ['requirejs', 'sed']
             },
             livereload: {
                 options: {
@@ -136,7 +148,7 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.registerTask('default', ['clean', 'sass', 'postcss', 'requirejs']);
+    grunt.registerTask('default', ['clean', 'sass', 'postcss', 'requirejs', 'sed']);
     grunt.registerTask('build', ['default', 'csso', 'uglify']);
     grunt.registerTask('serve', ['default', 'connect', 'watch']);
 };

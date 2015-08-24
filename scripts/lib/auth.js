@@ -64,7 +64,8 @@
                         reject(res.error);
                     });
             });
-        }
+        },
+        version: '%NODEAPI_VERSION%'
     };
 
     return function(options) {
