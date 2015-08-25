@@ -23,19 +23,19 @@ $coins-logon-widget: (
 // @type map
 //
 $coins-logon-widget-colors: (
-    active: #f5c464,
-    button-primary-background: #90b6bf,
+    active: mix(#dce4e7, #718d99),
+    button-primary-background: #364c59,
     button-primary-color: #fff,
-    button-secondary-background: #666,
+    button-secondary-background: #718d99,
     button-secondary-color: #fff,
-    error: #e96a57,
+    error: #ef5a21,
     input-background: #fff,
-    input-border: #666,
-    input-color: #222,
-    input-placeholder: #999,
-    label: #222,
+    input-border: #364c59,
+    input-color: #264150,
+    input-placeholder: #718d99,
+    label: #264150,
     notification-color: #fff,
-    success: #6cc5a7
+    success: darken(#b5d345, 12%)
 ) !default;
 
 /// Micro clearfix
