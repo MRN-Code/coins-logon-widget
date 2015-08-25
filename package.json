@@ -31,7 +31,6 @@
   "scripts": {},
   "dependencies": {
     "@fdaciuk/ajax": "fdaciuk/ajax#be8ad3",
-    "cookies-js": "^1.2.1",
     "es6-object-assign": "^1.0.1",
     "hawk": "^3.1.0",
     "nodeapi": "mrn-code/nodeapi#develop",

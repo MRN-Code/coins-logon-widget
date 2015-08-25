@@ -2,19 +2,17 @@
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define([
-            'cookies-js/dist/cookies',
             'es6-object-assign',
             'Ajax',
             'nodeapi/test/sdk/index'
-        ], function(cookies, ObjectAssign, Ajax, CoinsApiClient) {
-            return factory(cookies, ObjectAssign.assign, Ajax, CoinsApiClient);
+        ], function(ObjectAssign, Ajax, CoinsApiClient) {
+            return factory(ObjectAssign.assign, Ajax, CoinsApiClient);
         });
     } else if (typeof module === 'object' && module.exports) {
         // Node. Does not work with strict CommonJS, but
         // only CommonJS-like environments that support module.exports,
         // like Node.
         module.exports = factory(
-            require('cookies-js'),
             require('es6-object-assign').assign,
             require('@fdaciuk/ajax'),
             require('nodeapi/test/sdk')
@@ -23,13 +21,12 @@
         // Browser globals (root is window)
         root.CoinsLogonWidget = root.CoinsLogonWidget || {};
         root.CoinsLogonWidget.Auth = factory(
-            root.cookies,
             root.ObjectAssign.assign,
             root.Ajax,
             root.CoinsApiClient
         );
     }
-}(this, function (cookies, assign, Ajax, Client) {
+}(this, function (assign, Ajax, Client) {
     'use strict';
 
     var ajax =  new Ajax();
