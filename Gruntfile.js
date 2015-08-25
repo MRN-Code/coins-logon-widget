@@ -68,6 +68,12 @@ module.exports = function(grunt) {
             },
         },
         sed: {
+            requirejs: {
+                pattern: /\ndefine\("hawk.*\n/g,
+                replacement: '\n',
+                recursive: true,
+                path: '<%= config.distDir %>'
+            },
             version: {
                 pattern: '%NODEAPI_VERSION%',
                 replacement: NODEAPI_VERSION,
