@@ -47,7 +47,7 @@
             return new Promise(function(resolve, reject) {
                 var args = [url];
 
-                if (body) {
+                if (body && Object.keys(body).length) {
                     args.push(body);
                 }
 

@@ -2,9 +2,9 @@
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define(
-            ['es6-object-assign', 'unique-number'],
-            function(ObjectAssign, UniqueNumber) {
-                return factory(ObjectAssign.assign, UniqueNumber);
+            ['es6-object-assign', './utils'],
+            function(ObjectAssign, utils) {
+                return factory(ObjectAssign.assign, utils);
             }
         );
     } else if (typeof module === 'object' && module.exports) {
@@ -13,38 +13,31 @@
         // like Node.
         module.exports = factory(
             require('es6-object-assign').assign,
-            require('unique-number')
+            require('./utils')
         );
     } else {
         // Browser globals (root is window)
         root.CoinsLogonWidget = root.CoinsLogonWidget || {};
         root.CoinsLogonWidget.FormGroup = factory(
             root.ObjectAssign.assign,
-            root.UniqueNumber
+            root.CoinsLogonWidget.utils
         );
     }
-}(this, function (assign, UniqueNumber) {
-    var uniqueNumber = new UniqueNumber();
-
-    function uniqueId(string) {
-        if (typeof string !== 'string') {
-            string = '';
-        }
-        return string + uniqueNumber.generate();
-    }
+}(this, function (assign, utils) {
+    'use strict';
 
     function FormGroup(options) {
         options = options || {};
 
         this.options = assign({}, FormGroup.DEFAULTS, options);
-        this.element = this._getFormElements();
-        this.setState();
+        this.element = this._getElements();
+        this._setState();
     }
 
-    FormGroup.prototype._getFormElements = function() {
+    FormGroup.prototype._getElements = function() {
         var classNames = this.options.classNames;
         var div = document.createElement('div');
-        var id = uniqueId('coins-logon-widget-');
+        var id = utils.uniqueId('coins-logon-widget-');
         var input = document.createElement('input');
         var label = document.createElement('label');
 
@@ -69,25 +62,11 @@
         return div;
     };
 
-    FormGroup.prototype._getMessageElement = function(message) {
-        var span = document.createElement('span');
+    FormGroup.prototype._setState = function(state) {
+        if (typeof this._state === 'undefined') {
+            this._state = {};
+        }
 
-        span.className = this.options.classNames.message;
-        span.textContent = message;
-
-        return span;
-    };
-
-    FormGroup.prototype._getIconElement = function() {
-        var span = document.createElement('span');
-
-        span.className = this.options.classNames.icon;
-        span.setAttribute('aria-hidden', true);
-
-        return span;
-    };
-
-    FormGroup.prototype.setState = function(state, message) {
         var self = this;
         var element = this.element;
         var classNames = this.options.classNames;
@@ -95,35 +74,44 @@
         var iconElement = element.querySelector('.' + classNames.icon);
         var messageElement = element.querySelector('.' + classNames.message);
 
-        this.state = state;
+        assign(this._state, state);
 
-        if (state) {
+        if (this._state.message || this._state.error || this._state.success) {
             // Add an icon if it doesn't exist
             if (!iconElement) {
-                element.appendChild(this._getIconElement());
+                iconElement = document.createElement('span');
+                iconElement.className = this.options.classNames.icon;
+                iconElement.setAttribute('aria-hidden', true);
+                element.appendChild(iconElement);
             }
             // Add a message if needed, otherwise remove
-            if (!messageElement && message) {
-                element.appendChild(this._getMessageElement(message));
-            } else if (messageElement && message) {
-                messageElement.textContent = message;
-            } else {
+            if (!messageElement && this._state.message) {
+                messageElement = document.createElement('span');
+                messageElement.className = this.options.classNames.message;
+                element.appendChild(messageElement);
+            } else if (!this._state.message) {
                 messageElement.parentNode.removeChild(messageElement);
+            }
+            if (messageElement && this._state.message) {
+                messageElement.textContent = this._state.message;
             }
 
             // Handle state cases
-            if (state === 'error') {
+            if (this._state.error) {
                 element.classList.remove(classNames.success);
                 element.classList.add(classNames.error);
-            } else if (state === 'success') {
+            } else if (this._state.success) {
                 element.classList.remove(classNames.error);
                 element.classList.add(classNames.success);
             }
 
-            inputElement.addEventListener('keydown', function(event) {
-                self.clearState();
-                event.target.removeEventListener(event.type, arguments.callee);
-            }, false);
+            utils.once(inputElement, 'keydown', function() {
+                self._setState({
+                    error: null,
+                    message: null,
+                    success: null
+                });
+            });
         } else {
             if (iconElement) {
                 iconElement.parentNode.removeChild(iconElement);
@@ -136,16 +124,16 @@
         }
     };
 
-    FormGroup.prototype.clearState = function() {
-        this.setState();
+    //TODO: Remove potential `input` listeners
+    FormGroup.prototype.destroy = function() {
+        utils.removeElement(this.element);
+
+        delete this._state;
+        delete this.options;
     };
 
     FormGroup.prototype.getName = function() {
         return this.options.inputName;
-    };
-
-    FormGroup.prototype.getState = function() {
-        return this.state;
     };
 
     FormGroup.prototype.getValue = function() {
@@ -161,7 +149,10 @@
             isValid = validator(value);
 
             if (isValid !== true) {
-                this.setState('error', isValid);
+                this._setState({
+                    error: true,
+                    message: isValid
+                });
                 return false;
             }
         }
@@ -181,7 +172,7 @@
         },
         inputName: 'name',
         labelText: 'Name:',
-        placeholder: 'Ex: Pat Smith',
+        placeholder: '',
         required: true,
         type: 'text',
         validate: function(value) {
