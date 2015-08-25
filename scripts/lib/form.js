@@ -44,7 +44,14 @@
         var button = document.createElement('button');
         var form = document.createElement('form');
 
+        console.log(this.options);
+
         form.className = this.options.classNames.form;
+
+        if (this.options.horizontal) {
+            form.classList.add(this.options.classNames.horizontal);
+        }
+
         form.method = 'post';
         form.addEventListener(
             'submit',
@@ -243,6 +250,7 @@
             buttonPrimary: 'coins-logon-widget-button-primary',
             buttonSecondary: 'coins-logon-widget-button-secondary',
             form: 'coins-logon-widget-form',
+            horizontal: 'coins-logon-widget-form-horizontal',
             notification: 'coins-logon-widget-notification',
             notificationError: 'coins-logon-widget-notification-error',
             notificationSuccess: 'coins-logon-widget-notification-success',

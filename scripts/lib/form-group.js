@@ -48,13 +48,19 @@
         input.className = classNames.input;
         input.id = id;
         input.name = this.options.inputName;
-        if (this.options.placeholder) {
-            input.placeholder = this.options.placeholder;
-        }
-        if (this.options.required) {
-            input.setAttribute('aria-required', true);
-        }
         input.type = this.options.type;
+
+        if (this.options.hiddenLabel) {
+            label.classList.add(classNames.hidden);
+            input.placeholder = this.options.placeholder || this.options.labelText;
+        } else {
+            if (this.options.placeholder) {
+                input.placeholder = this.options.placeholder;
+            }
+            if (this.options.required) {
+                input.setAttribute('aria-required', true);
+            }
+        }
 
         div.appendChild(label);
         div.appendChild(input);
@@ -164,12 +170,14 @@
         classNames: {
             error: 'coins-logon-widget-form-group-error',
             formGroup: 'coins-logon-widget-form-group',
+            hidden: 'coins-logon-widget-visuallyhidden',
             icon: 'coins-logon-widget-icon',
             input: 'coins-logon-widget-input',
             label: 'coins-logon-widget-label',
             message: 'coins-logon-widget-input-message',
             success: 'coins-logon-widget-form-group-success'
         },
+        hiddenLabel: false,
         inputName: 'name',
         labelText: 'Name:',
         placeholder: '',

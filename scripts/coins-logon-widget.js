@@ -63,6 +63,19 @@
 
         this.options = assign({}, CoinsLogonWidget.DEFAULTS, options);
 
+        /**
+         * If the form has hidden labels or a horizontal layout apply the
+         * `hiddenLabel` form group option. This persists the option down to the
+         * `FormGroup` elements.
+         *
+         * @todo  Devise a better solution for passing down options
+         */
+        if (this.options.hiddenLabels || this.options.horizontal) {
+            this.options.formGroups.forEach(function(formGroupOption) {
+                formGroupOption.hiddenLabel = true;
+            });
+        }
+
         // Configure auth, SDK client
         // TODO: Enable passing of more options
         auth = Auth({ baseUrl: this.options.baseUrl });
@@ -89,6 +102,7 @@
 
         this.form = new Form({
             formGroups: this.options.formGroups.reverse(),
+            horizontal: this.options.horizontal,
             login: function() {
                 self.emit(EVENTS.LOGIN, self.form.getFormData());
             },
@@ -208,7 +222,9 @@
             labelText: 'Password:',
             placeholder: '',
             type: 'password'
-        }]
+        }],
+        hiddenLabels: false,
+        horizontal: false
     };
 
     return CoinsLogonWidget;
