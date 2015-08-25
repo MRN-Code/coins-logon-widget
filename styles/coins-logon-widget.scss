@@ -53,22 +53,15 @@ $coins-logon-widget-colors: (
     }
 }
 
-/* ==========================================================================
-   Form Elements
-   ========================================================================== */
-
 /**
- * Form.
- *
- * The root `form` element.
+ * Root.
  */
-.coins-logon-widget-form {
-    @include -coins-logon-widget-clearfix;
-
+.coins-logon-widget {
     font-family: map-get($coins-logon-widget, 'font-family');
     font-size: map-get($coins-logon-widget, 'font-size');
     font-weight: map-get($coins-logon-widget, 'font-weight');
     line-height: map-get($coins-logon-widget, 'line-height');
+    text-align: left;
 
     /** Make children adhere to 'border-box' spacing */
     *,
@@ -76,6 +69,23 @@ $coins-logon-widget-colors: (
     *:after {
         box-sizing: border-box;
     }
+}
+
+/* ==========================================================================
+   Form Elements
+   ========================================================================== */
+
+/**
+ * Form.
+ *
+ * The main `form` element.
+ */
+.coins-logon-widget-form {
+    @include -coins-logon-widget-clearfix;
+
+    font-size: 100%;
+    line-height: inherit;
+    margin: 0;
 }
 
 /**
@@ -96,43 +106,67 @@ $coins-logon-widget-colors: (
     color: map-get($coins-logon-widget-colors, 'label');
     cursor: pointer;
     display: block;
-    font-weight: inherit;
-    padding: 0 0 .25em;
-}
-
-/**
- * Input.
- */
-.coins-logon-widget-input {
-    background: map-get($coins-logon-widget-colors, 'input-background');
-    border-radius: map-get($coins-logon-widget, 'border-radius');
-    border: thin solid map-get($coins-logon-widget-colors, 'input-border');
-    color: map-get($coins-logon-widget-colors, 'input-color');
-    display: block;
     font-family: inherit;
     font-size: 100%;
     font-weight: inherit;
     line-height: inherit;
-    padding: map-get($coins-logon-widget, 'padding');
-    transition: box-shadow map-get($coins-logon-widget, 'transition-duration');
-    width: 100%;
+    margin: 0;
+    padding: 0 0 .25em;
+    text-align: inherit;
+}
 
-    &:focus {
-        box-shadow: 0 0 0 .25em map-get($coins-logon-widget-colors, 'active');
-        outline: none;
-    }
+/**
+ * Input.
+ *
+ * @todo  Add hooks for more input types.
+ */
+input[type="password"],
+input[type="text"] {
+    $background: map-get($coins-logon-widget-colors, 'input-background');
+    $border-color: map-get($coins-logon-widget-colors, 'input-border');
+    $color: map-get($coins-logon-widget-colors, 'input-color');
 
-    /** Placeholder color */
-    $input-placeholder: map-get($coins-logon-widget-colors, 'input-placeholder');
+    &.coins-logon-widget-input {
+        background: $background;
+        border-color: $border-color;
+        border-radius: map-get($coins-logon-widget, 'border-radius');
+        border-style: solid;
+        border-width: thin;
+        box-shadow: none;
+        color: $color;
+        display: block;
+        font-family: inherit;
+        font-size: 100%;
+        font-weight: inherit;
+        line-height: inherit;
+        margin: 0;
+        padding: map-get($coins-logon-widget, 'padding');
+        transition: box-shadow map-get($coins-logon-widget, 'transition-duration');
+        width: 100%;
 
-    &::-webkit-input-placeholder {
-        color: $input-placeholder;
-    }
-    &::-moz-placeholder {
-        color: $input-placeholder;
-    }
-    &:-ms-input-placeholder {
-        color: $input-placeholder;
+        &:focus,
+        &:hover {
+            background: $background;
+            border-color: $border-color;
+            color: $color;
+        }
+        &:focus {
+            box-shadow: 0 0 0 .25em map-get($coins-logon-widget-colors, 'active');
+            outline: none;
+        }
+
+        /** Placeholder color */
+        $input-placeholder: map-get($coins-logon-widget-colors, 'input-placeholder');
+
+        &::-webkit-input-placeholder {
+            color: $input-placeholder;
+        }
+        &::-moz-placeholder {
+            color: $input-placeholder;
+        }
+        &:-ms-input-placeholder {
+            color: $input-placeholder;
+        }
     }
 }
 
