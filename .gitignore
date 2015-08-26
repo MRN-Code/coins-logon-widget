@@ -28,3 +28,5 @@ node_modules
 
 .tmp
 dist
+config/*
+!config/default.example.json

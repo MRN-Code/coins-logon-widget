@@ -1,10 +1,13 @@
 /* jshint node:true */
 'use strict';
 
+var config = require('config');
+
 module.exports = function(grunt) {
     require('load-grunt-tasks')(grunt);
 
-    var NODEAPI_VERSION = grunt.file.readJSON('./node_modules/nodeapi/package.json').version;
+    var NODEAPI_BASEURL = config.baseUrl;
+    var NODEAPI_VERSION = config.version;
 
     grunt.initConfig({
         config: {
@@ -68,6 +71,12 @@ module.exports = function(grunt) {
             },
         },
         sed: {
+            baseUrl: {
+                pattern: '%NODEAPI_BASEURL%',
+                replacement: NODEAPI_BASEURL,
+                recursive: true,
+                path: '<%= config.distDir %>'
+            },
             requirejs: {
                 pattern: /\ndefine\("hawk.*\n/g,
                 replacement: '\n',
