@@ -6,7 +6,13 @@
             'Ajax',
             'nodeapi/test/sdk/index'
         ], function(ObjectAssign, Ajax, CoinsApiClient) {
-            return factory(ObjectAssign.assign, Ajax, CoinsApiClient);
+            return factory(
+                ObjectAssign.assign,
+                Ajax,
+                CoinsApiClient,
+                '%NODEAPI_BASEURL%',
+                '%NODEAPI_VERSION%'
+            );
         });
     } else if (typeof module === 'object' && module.exports) {
         // Node. Does not work with strict CommonJS, but
@@ -15,7 +21,9 @@
         module.exports = factory(
             require('es6-object-assign').assign,
             require('@fdaciuk/ajax'),
-            require('nodeapi/test/sdk')
+            require('nodeapi/test/sdk'),
+            require('config').baseUrl,
+            require('nodeapi/package.json').version
         );
     } else {
         // Browser globals (root is window)
@@ -23,16 +31,18 @@
         root.CoinsLogonWidget.Auth = factory(
             root.ObjectAssign.assign,
             root.Ajax,
-            root.CoinsApiClient
+            root.CoinsApiClient,
+            '%NODEAPI_BASEURL%',
+            '%NODEAPI_VERSION%'
         );
     }
-}(this, function (assign, Ajax, Client) {
+}(this, function (assign, Ajax, Client, baseUrl, version) {
     'use strict';
 
     var ajax =  new Ajax();
 
     var DEFAULTS = {
-        baseUrl: 'http://localhost:8443/api',
+        baseUrl: baseUrl,
         formatResponseCallback: function(response) {
             return response;
         },
@@ -62,7 +72,7 @@
                     });
             });
         },
-        version: '%NODEAPI_VERSION%'
+        version: version
     };
 
     return function(options) {
