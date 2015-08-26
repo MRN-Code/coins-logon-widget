@@ -26,10 +26,17 @@ widget.on('logout:error', function() {});
     1. `cd` into the repo’s directory
     2. Run `npm install`
 
+### Configuration
+
+The build process relies on some configuration through [config](https://www.npmjs.com/package/config), specifically for the `baseUrl` and `version` options for the SDK client. Check out _config/default.example.json_ for the expected format.
+
+If you’re in the COINS environment, you can run `grunt config` to generate a suitable configuration file at _config/default.js_. This file expects a `COINS_ENV` environment variable and API mappings in _/coins/coins_auth/node-api-hostmap.json_.
+
 ## Project Tasks
 
 This project relies on Grunt to run tasks. (See its [getting started guide](http://gruntjs.com/getting-started) for basic info.) Currently, three tasks exist:
 
+* **`grunt config`:** Generate a _config/default.js_ configuration file. _Do this first!_
 * **`grunt`:** Build the project’s _un-minified_ styles and scripts
 * **`grunt build`:** Build the project’s _minified_ styles and scripts, suitable for production.
 * **`grunt serve`:** Spin up a [connect](https://www.npmjs.com/package/connect) server and rebuild the styles and scripts when they change. Useful for development on the project.

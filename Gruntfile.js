@@ -166,4 +166,26 @@ module.exports = function(grunt) {
     grunt.registerTask('default', ['clean', 'sass', 'postcss', 'requirejs', 'sed']);
     grunt.registerTask('build', ['default', 'csso', 'uglify']);
     grunt.registerTask('serve', ['default', 'connect', 'watch']);
+
+    grunt.registerTask('config', 'description', function() {
+        grunt.file.write(
+            'config/default.js',
+            [
+                '/* jshint node:true */',
+                '\'use strict\';',
+                '',
+                'var hostMap = require(\'/coins/coins_auth/node-api-hostmap.json\');',
+                'var version = require(\'nodeapi/package.json\').version;',
+                'var env = process.env.COINS_ENV;',
+                'var baseUrl = \'https://\' + hostMap[env].hostname;',
+                'baseUrl += !!hostMap[env].sslPort ? \':\' + hostMap[env].sslPort : \'\';',
+                'baseUrl += \'/api\';',
+                '',
+                'module.exports = {',
+                '    baseUrl: baseUrl,',
+                '    version: version',
+                '};'
+            ].join('\n')
+        );
+    });
 };
