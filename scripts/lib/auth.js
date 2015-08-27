@@ -3,12 +3,10 @@
         // AMD. Register as an anonymous module.
         define([
             'es6-object-assign',
-            'Ajax',
             'nodeapi/test/sdk/index'
-        ], function(ObjectAssign, Ajax, CoinsApiClient) {
+        ], function(ObjectAssign, CoinsApiClient) {
             return factory(
                 ObjectAssign.assign,
-                Ajax,
                 CoinsApiClient,
                 '%NODEAPI_BASEURL%',
                 '%NODEAPI_VERSION%'
@@ -20,7 +18,6 @@
         // like Node.
         module.exports = factory(
             require('es6-object-assign').assign,
-            require('@fdaciuk/ajax'),
             require('nodeapi/test/sdk'),
             require('config').baseUrl,
             require('nodeapi/package.json').version
@@ -30,16 +27,13 @@
         root.CoinsLogonWidget = root.CoinsLogonWidget || {};
         root.CoinsLogonWidget.Auth = factory(
             root.ObjectAssign.assign,
-            root.Ajax,
             root.CoinsApiClient,
             '%NODEAPI_BASEURL%',
             '%NODEAPI_VERSION%'
         );
     }
-}(this, function (assign, Ajax, Client, baseUrl, version) {
+}(this, function (assign, Client, baseUrl, version) {
     'use strict';
-
-    var ajax =  new Ajax();
 
     var DEFAULTS = {
         baseUrl: baseUrl,
@@ -48,28 +42,37 @@
         },
         requestFn: function(options) {
             var body = options.body || {};
-            var method = options.method || 'get';
+            var method = options.method || 'GET';
             var url = options.uri || '';
 
             return new Promise(function(resolve, reject) {
-                var args = [url];
-
-                if (body && Object.keys(body).length) {
-                    args.push(body);
-                }
-
-                ajax[method.toLowerCase()].apply(null, args)
-                    .done(function(res, xhr) {
+                var options = {
+                    url: url,
+                    type: method,
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function(data, textStatus, jqXHR) {
                         resolve({
                             body: {
-                                data: res.data
+                                data: data.data
                             },
-                            statusCode: xhr.status
+                            statusCode: jqXHR.status
                         });
-                    })
-                    .error(function(res) {
-                        reject(res.error);
-                    });
+                    },
+                    error: function(jqXHR) {
+                        var statusText = jqXHR.statusText;
+                        var message= (JSON.parse(jqXHR.responseText) || {});
+                        message = (message.error || {}).message || '';
+                        reject(message || statusText);
+                    }
+                };
+
+                if (body && Object.keys(body).length) {
+                    options.data = body;
+                }
+
+                jQuery.ajax(options);
             });
         },
         version: version
