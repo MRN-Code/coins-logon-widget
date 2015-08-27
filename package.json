@@ -2,12 +2,13 @@
   "name": "coins-logon-widget",
   "version": "1.0.0",
   "description": "COINS Logon Widget.  Injectable utility to manage browser authorization with COINS",
-  "main": "dist/coins-logon-widget.js",
+  "main": "scripts/coins-logon-widget.js",
+  "style": "dist/coins-logon-widget.css",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MRN-Code/coins-logon-widget.git"
   },
-  "author": "cdaringe",
+  "author": "MRN NI Team <nidev@mrn.org>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/MRN-Code/coins-logon-widget/issues"
@@ -28,7 +29,6 @@
     "grunt-sed": "^0.1.1",
     "load-grunt-tasks": "^3.2.0"
   },
-  "scripts": {},
   "dependencies": {
     "es6-object-assign": "^1.0.1",
     "hawk": "^3.1.0",
@@ -36,5 +36,11 @@
     "rename-keys": "^1.1.2",
     "unique-number": "^2.0.1",
     "wolfy87-eventemitter": "^4.2.11"
-  }
+  },
+  "keywords": [
+    "logon",
+    "widget",
+    "login",
+    "coins"
+  ]
 }
