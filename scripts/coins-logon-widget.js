@@ -141,11 +141,15 @@
 
         data = assign.apply(null, formData);
 
+        this.form.setLoading();
+
         auth.login(data.username, data.password)
             .then(function(response) {
+                self.form.clearLoading();
                 self.emit(EVENTS.LOGIN_SUCCESS, response);
             })
             .catch(function(error) {
+                self.form.clearLoading();
                 self.emit(EVENTS.LOGIN_ERROR, error);
             });
     };
@@ -153,11 +157,15 @@
     CoinsLogonWidget.prototype.logout = function() {
         var self = this;
 
+        this.form.setLoading();
+
         auth.logout()
             .then(function(response) {
+                self.form.clearLoading();
                 self.emit(EVENTS.LOGOUT_SUCCESS, response);
             })
             .catch(function(error) {
+                self.form.clearLoading();
                 self.emit(EVENTS.LOGOUT_ERROR, error);
             });
     };

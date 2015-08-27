@@ -86,6 +86,7 @@ $coins-logon-widget-colors: (
     font-size: 100%;
     line-height: inherit;
     margin: 0;
+    position: relative;
 }
 
 /**
@@ -307,6 +308,60 @@ input[type="text"] {
 }
 
 /* ==========================================================================
+   Indicator
+   ========================================================================== */
+
+/**
+ * Animating loader indicator using SVG.
+ *
+ * @{@link  http://codepen.io/jczimm/pen/vEBpoL}
+ */
+.coins-logon-widget-indicator {
+    $width: 40px;
+
+    bottom: 0;
+    display: inline-block;
+    height: $width;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    width: $width;
+
+    svg {
+        animation: rotate 2500ms linear infinite;
+        height: $width;
+        width: $width;
+    }
+    circle {
+        animation: dash 2000ms ease-in-out infinite;
+        stroke: map-get($coins-logon-widget-colors, 'label');
+        stroke-dasharray: 1, 200;
+        stroke-dashoffset: 0;
+        stroke-linecap: round;
+    }
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+@keyframes dash {
+    0% {
+        stroke-dasharray: 1, 200;
+        stroke-dashoffset: 0;
+    }
+    50% {
+        stroke-dasharray: 89, 200;
+        stroke-dashoffset: -35;
+    }
+    100% {
+        stroke-dasharray: 89, 200;
+        stroke-dashoffset: -124;
+    }
+}
+
+/* ==========================================================================
    Form States
    ========================================================================== */
 
@@ -335,6 +390,17 @@ input[type="text"] {
         .coins-logon-widget-input-message {
             color: $color;
         }
+    }
+}
+
+/**
+ * Loading.
+ *
+ * Show the loading indicator.
+ */
+.coins-logon-widget-loading {
+    .coins-logon-widget-indicator {
+        opacity: 1;
     }
 }
 

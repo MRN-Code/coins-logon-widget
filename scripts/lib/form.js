@@ -44,8 +44,6 @@
         var button = document.createElement('button');
         var form = document.createElement('form');
 
-        console.log(this.options);
-
         form.className = this.options.classNames.form;
 
         if (this.options.horizontal) {
@@ -59,12 +57,46 @@
             false
         );
 
-        button.className = this.options.classNames.button;
+        //TODO: Make alignment passed through options
+        button.className = this.options.classNames.button + ' ' + this.options.classNames.right;
         button.type = 'submit';
 
+        form.appendChild(this._getIndicatorElements());
         form.appendChild(button);
 
         return form;
+    };
+
+    Form.prototype._getIndicatorElements = function() {
+        var indicator = document.createElement('div');
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        var title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        var circleAttributes= {
+            cx: 20,
+            cy: 20,
+            r: 8,
+            fill: 'none',
+            'stroke-width': 2,
+            'stroke-miterlimit': 4
+        };
+
+        indicator.className = this.options.classNames.indicator;
+        indicator.setAttribute('aria-hidden', true);
+
+        title.textContent = 'Loading…';
+
+        for (var prop in circleAttributes) {
+            if (circleAttributes.hasOwnProperty(prop)) {
+                circle.setAttribute(prop, circleAttributes[prop]);
+            }
+        }
+ 
+        svg.appendChild(title);
+        svg.appendChild(circle);
+        indicator.appendChild(svg);
+
+        return indicator;
     };
 
     Form.prototype._setState = function(state) {
@@ -74,6 +106,7 @@
 
         var self = this;
         var button = this.element.querySelector('.' + this.options.classNames.button);
+        var indicator = this.element.querySelector('.' + this.options.classNames.indicator);
         var notification = this.element.querySelector('.' + this.options.classNames.notification);
         var status = this.element.querySelector('.' + this.options.classNames.status);
         var formGroups;
@@ -104,6 +137,15 @@
             }
         }
 
+        // Indicator
+        if (this._state.loading) {
+            this.element.classList.add(this.options.classNames.loading);
+            indicator.setAttribute('aria-hidden', false);
+        } else {
+            this.element.classList.remove(this.options.classNames.loading);
+            indicator.setAttribute('aria-hidden', true);
+        }
+
         if (this._state.login) {
             // Add form groups
             if (!this.formGroups) {
@@ -115,10 +157,7 @@
                     })
                     .reverse()
                     .forEach(function(formGroupElement){
-                        self.element.insertBefore(
-                            formGroupElement,
-                            self.element.lastChild
-                        );
+                        self.element.insertBefore(formGroupElement, indicator);
                     });
             }
             if (status) {
@@ -206,6 +245,18 @@
         });
     };
 
+    Form.prototype.setLoading = function() {
+        this._setState({
+            loading: true
+        });
+    };
+
+    Form.prototype.clearLoading = function() {
+        this._setState({
+            loading: false
+        });
+    };
+
     Form.prototype.setSuccessMessage = function(message) {
         this._setState({
             notification: message,
@@ -251,9 +302,12 @@
             buttonSecondary: 'coins-logon-widget-button-secondary',
             form: 'coins-logon-widget-form',
             horizontal: 'coins-logon-widget-form-horizontal',
+            indicator: 'coins-logon-widget-indicator',
+            loading: 'coins-logon-widget-form-loading',
             notification: 'coins-logon-widget-notification',
             notificationError: 'coins-logon-widget-notification-error',
             notificationSuccess: 'coins-logon-widget-notification-success',
+            right: 'coins-logon-widget-right',
             status: 'coins-logon-widget-status',
         },
         initialState: {
