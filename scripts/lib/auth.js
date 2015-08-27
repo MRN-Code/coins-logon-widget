@@ -8,7 +8,6 @@
             return factory(
                 ObjectAssign.assign,
                 CoinsApiClient,
-                '%NODEAPI_BASEURL%',
                 '%NODEAPI_VERSION%'
             );
         });
@@ -19,7 +18,6 @@
         module.exports = factory(
             require('es6-object-assign').assign,
             require('nodeapi/test/sdk'),
-            require('config').baseUrl,
             require('nodeapi/package.json').version
         );
     } else {
@@ -28,15 +26,13 @@
         root.CoinsLogonWidget.Auth = factory(
             root.ObjectAssign.assign,
             root.CoinsApiClient,
-            '%NODEAPI_BASEURL%',
             '%NODEAPI_VERSION%'
         );
     }
-}(this, function (assign, Client, baseUrl, version) {
+}(this, function (assign, Client, version) {
     'use strict';
 
     var DEFAULTS = {
-        baseUrl: baseUrl,
         formatResponseCallback: function(response) {
             return response;
         },

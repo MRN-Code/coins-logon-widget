@@ -1,13 +1,10 @@
 /* jshint node:true */
 'use strict';
 
-var config = require('config');
-
 module.exports = function(grunt) {
     require('load-grunt-tasks')(grunt);
 
-    var NODEAPI_BASEURL = config.baseUrl;
-    var NODEAPI_VERSION = config.version;
+    var NODEAPI_VERSION = grunt.file.readJSON('./node_modules/nodeapi/package.json').version;
 
     grunt.initConfig({
         config: {
@@ -16,13 +13,6 @@ module.exports = function(grunt) {
             scriptsDir: 'scripts',
             stylesDir: 'styles',
             tempDir: '.tmp'
-        },
-        browserify: {
-            dist: {
-                files: {
-                    '<%= config.distDir %>/coins-logon-widget.js': '<%= config.scriptsDir %>/coins-logon-widget.js'
-                }
-            }
         },
         clean: ['<%= config.tempDir %>', '<%= config.distDir %>'],
         connect: {
@@ -71,12 +61,6 @@ module.exports = function(grunt) {
             },
         },
         sed: {
-            baseUrl: {
-                pattern: '%NODEAPI_BASEURL%',
-                replacement: NODEAPI_BASEURL,
-                recursive: true,
-                path: '<%= config.distDir %>'
-            },
             requirejs: {
                 pattern: /\ndefine\("hawk.*\n/g,
                 replacement: '\n',
@@ -166,26 +150,4 @@ module.exports = function(grunt) {
     grunt.registerTask('default', ['clean', 'sass', 'postcss', 'requirejs', 'sed']);
     grunt.registerTask('build', ['default', 'csso', 'uglify']);
     grunt.registerTask('serve', ['default', 'connect', 'watch']);
-
-    grunt.registerTask('config', 'description', function() {
-        grunt.file.write(
-            'config/default.js',
-            [
-                '/* jshint node:true */',
-                '\'use strict\';',
-                '',
-                'var hostMap = require(\'/coins/coins_auth/node-api-hostmap.json\');',
-                'var version = require(\'nodeapi/package.json\').version;',
-                'var env = process.env.COINS_ENV;',
-                'var baseUrl = \'https://\' + hostMap[env].hostname;',
-                'baseUrl += !!hostMap[env].sslPort ? \':\' + hostMap[env].sslPort : \'\';',
-                'baseUrl += \'/api\';',
-                '',
-                'module.exports = {',
-                '    baseUrl: baseUrl,',
-                '    version: version',
-                '};'
-            ].join('\n')
-        );
-    });
 };
