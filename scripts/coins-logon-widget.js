@@ -130,7 +130,6 @@
     CoinsLogonWidget.prototype.login = function(formData) {
         var self = this;
         var validations = self.form.validate();
-        var data;
 
         if (validations !== true) {
             self.emit(EVENTS.INVALID, validations);
@@ -139,11 +138,9 @@
             self.form.clearMessage();
         }
 
-        data = assign.apply(null, formData);
-
         this.form.setLoading();
 
-        auth.login(data.username, data.password)
+        auth.login(formData.username, formData.password)
             .then(function(response) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGIN_SUCCESS, response);

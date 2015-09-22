@@ -231,11 +231,15 @@
     };
 
     Form.prototype.getFormData = function() {
-        return this.formGroups.map(function(formGroup) {
-            var data = {};
-            data[formGroup.getName()] = formGroup.getValue();
+        return this.formGroups.reduce(function(data, formGroup) {
+            var name = formGroup.getName();
+
+            if (!(name in data)) {
+                data[name] = formGroup.getValue();
+            }
+
             return data;
-        });
+        }, {});
     };
 
     Form.prototype.setErrorMessage = function(message) {
