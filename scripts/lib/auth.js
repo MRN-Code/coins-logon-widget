@@ -101,7 +101,7 @@
     /**
      * Map API's successful response.
      *
-     * @param  {object} respones API response object
+     * @param  {object} response API response object
      * @return {object}
      */
     function mapApiSuccess(response) {

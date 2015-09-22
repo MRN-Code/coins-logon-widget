@@ -1269,26 +1269,11 @@ if (typeof module !== 'undefined' && module.exports) {
     /**
      * Map API's successful response.
      *
-     * Successful authentication also contains information regarding a user's
-     * account status. If the user's password or account is expired this
-     * method handles it by throwing an error.
-     *
      * @param  {object} response API response object
      * @return {object}
      */
     function mapApiSuccess(response) {
-        var data = response.data[0];
-
-        // testing
-        throw new Error('test error!');
-
-        if (data.user.passwordExpDate) {
-            throw new Error('Password expires');
-        } else if (data.user.acctExpDate) {
-            throw new Error('Account expires');
-        }
-
-        return data;
+        return response.data[0];
     }
 
     /**
