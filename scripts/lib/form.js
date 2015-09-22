@@ -91,7 +91,7 @@
                 circle.setAttribute(prop, circleAttributes[prop]);
             }
         }
- 
+
         svg.appendChild(title);
         svg.appendChild(circle);
         indicator.appendChild(svg);
@@ -115,7 +115,7 @@
 
         // Notification
         if (notification && !state.notification) {
-            this.element.removeChild(notification);
+            utils.removeElement(notification);
         } else if (!notification && state.notification) {
             notification = document.createElement('div');
             notification.className = this.options.classNames.notification;
@@ -124,7 +124,11 @@
         }
 
         if (notification && state.notification) {
-            notification.textContent = state.notification;
+            if (state.notification instanceof Node) {
+                notification.appendChild(state.notification);
+            } else {
+                notification.textContent = state.notification;
+            }
 
             notification.classList.remove(this.options.classNames.notificationError);
             notification.classList.remove(this.options.classNames.notificationSuccess);
