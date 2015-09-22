@@ -1304,28 +1304,29 @@ if (typeof module !== 'undefined' && module.exports) {
      * @return {Promise}
      */
     function login(username, password) {
-        return new Promise(function(resolve, reject) {
-            jQuery.ajax({
-                data: {
-                    password: btoa(password),
-                    username: btoa(username),
-                },
-                dataType: 'json',
-                type: 'POST',
-                url: getApiUrl('/auth/keys'),
-                xhrFields: {
-                    withCredentials: true
-                },
+        var deferred = jQuery.Deferred();
+
+        jQuery.ajax({
+            data: {
+                password: btoa(password),
+                username: btoa(username),
+            },
+            dataType: 'json',
+            type: 'POST',
+            url: getApiUrl('/auth/keys'),
+            xhrFields: {
+                withCredentials: true
+            },
+        })
+            .done(function(response) {
+                var credentials = mapApiSuccess(response);
+                setAuthCredentials(credentials);
+                deferred.resolve(credentials);
             })
-                .done(function(response) {
-                    var credentials = mapApiSuccess(response);
-                    setAuthCredentials(credentials);
-                    resolve(credentials);
-                })
-                .fail(function(error) {
-                    reject(mapApiError(error));
-                });
-        });
+            .fail(function(error) {
+                deferred.reject(mapApiError(error));
+            });
+        return deferred.promise();
     }
 
     /**
@@ -1334,33 +1335,34 @@ if (typeof module !== 'undefined' && module.exports) {
      * @return {Promise}
      */
     function logout() {
-        return new Promise(function(resolve, reject) {
-            var id = getAuthCredentials().id;
-            var method = 'DELETE';
-            var url = getApiUrl('/auth/keys/' + id);
+        var deferred = jQuery.Deferred();
+        var id = getAuthCredentials().id;
+        var method = 'DELETE';
+        var url = getApiUrl('/auth/keys/' + id);
 
-            return jQuery.ajax({
-                dataType: 'json',
-                headers: getHawkHeaders(url, method),
-                type: method,
-                url: getApiUrl('/auth/keys/' + id),
-                xhrFields: {
-                    withCredentials: true
-                },
+        jQuery.ajax({
+            dataType: 'json',
+            headers: getHawkHeaders(url, method),
+            type: method,
+            url: getApiUrl('/auth/keys/' + id),
+            xhrFields: {
+                withCredentials: true
+            },
+        })
+            .done(function(response) {
+                deferred.resolve(mapApiSuccess(response));
             })
-                .done(function(response) {
-                    resolve(mapApiSuccess(response));
-                })
-                .fail(function(error) {
-                    reject(mapApiError(error));
-                })
-                .always(function() {
-                    return setAuthCredentials({
-                        date: Date.now(),
-                        status: 'logged out',
-                    });
+            .fail(function(error) {
+                deferred.reject(mapApiError(error));
+            })
+            .always(function() {
+                return setAuthCredentials({
+                    date: Date.now(),
+                    status: 'logged out',
                 });
-        });
+            });
+
+        return deferred.promise();
     }
 
     /**
@@ -2176,11 +2178,11 @@ if (typeof module !== 'undefined' && module.exports) {
         this.form.setLoading();
 
         Auth.login(formData.username, formData.password)
-            .then(function(response) {
+            .done(function(response) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGIN_SUCCESS, response);
             })
-            .catch(function(error) {
+            .faih(function(error) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGIN_ERROR, error);
             });
@@ -2192,11 +2194,11 @@ if (typeof module !== 'undefined' && module.exports) {
         this.form.setLoading();
 
         Auth.logout()
-            .then(function(response) {
+            .done(function(response) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGOUT_SUCCESS, response);
             })
-            .catch(function(error) {
+            .fail(function(error) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGOUT_ERROR, error);
             });

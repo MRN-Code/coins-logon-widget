@@ -146,11 +146,11 @@
         this.form.setLoading();
 
         Auth.login(formData.username, formData.password)
-            .then(function(response) {
+            .done(function(response) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGIN_SUCCESS, response);
             })
-            .catch(function(error) {
+            .fail(function(error) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGIN_ERROR, error);
             });
@@ -162,11 +162,11 @@
         this.form.setLoading();
 
         Auth.logout()
-            .then(function(response) {
+            .done(function(response) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGOUT_SUCCESS, response);
             })
-            .catch(function(error) {
+            .fail(function(error) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGOUT_ERROR, error);
             });
