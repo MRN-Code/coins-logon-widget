@@ -1191,14 +1191,10 @@ if (typeof module !== 'undefined' && module.exports) {
     /** Authentication credentials key for localStorage. */
     var AUTH_CREDENTIALS_KEY = 'COINS_AUTH_CREDENTIALS';
 
-    /** Default options. */
-    var DEFAULTS = {
-        baseUrl: 'https://localcoin.mrn.org:8443/api',
-        version: '1.3.0',
-    };
-
     /** Local holder for options. */
-    var options = {};
+    var options = {
+        baseUrl: ''
+    };
 
     /**
      * Get saved authentication credentials.
@@ -1247,7 +1243,7 @@ if (typeof module !== 'undefined' && module.exports) {
      */
     function getApiUrl(endpoint) {
         var options = getOptions();
-        return options.baseUrl + '/v' + options.version + endpoint;
+        return options.baseUrl + endpoint;
     }
 
     /**
@@ -1266,18 +1262,33 @@ if (typeof module !== 'undefined' && module.exports) {
      * @return {object}
      */
     function setOptions(newOptions) {
-        options = assign({}, DEFAULTS, options, newOptions);
+        assign(options, newOptions);
         return getOptions();
     }
 
     /**
      * Map API's successful response.
      *
-     * @param  {object} respones API response object
+     * Successful authentication also contains information regarding a user's
+     * account status. If the user's password or account is expired this
+     * method handles it by throwing an error.
+     *
+     * @param  {object} response API response object
      * @return {object}
      */
     function mapApiSuccess(response) {
-        return response.data[0];
+        var data = response.data[0];
+
+        // testing
+        throw new Error('test error!');
+
+        if (data.user.passwordExpDate) {
+            throw new Error('Password expires');
+        } else if (data.user.acctExpDate) {
+            throw new Error('Account expires');
+        }
+
+        return data;
     }
 
     /**
@@ -2089,8 +2100,6 @@ if (typeof module !== 'undefined' && module.exports) {
     };
 
     function CoinsLogonWidget(element, options) {
-        var authOptions = {};
-
         EventEmitter.call(this);
 
         this.options = assign({}, CoinsLogonWidget.DEFAULTS, options);
@@ -2110,12 +2119,10 @@ if (typeof module !== 'undefined' && module.exports) {
 
         // Configure auth
         if (this.options.baseUrl) {
-            authOptions.baseUrl = this.options.baseUrl;
+            Auth.setOptions({
+                baseUrl: this.options.baseUrl
+            });
         }
-        if (this.options.version) {
-            authOptions.version = this.options.version;
-        }
-        Auth.setOptions(authOptions);
 
         this.element = this._getElements(element);
         this._setState();
@@ -2182,7 +2189,7 @@ if (typeof module !== 'undefined' && module.exports) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGIN_SUCCESS, response);
             })
-            .faih(function(error) {
+            .fail(function(error) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGIN_ERROR, error);
             });

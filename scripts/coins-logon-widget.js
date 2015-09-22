@@ -57,8 +57,6 @@
     };
 
     function CoinsLogonWidget(element, options) {
-        var authOptions = {};
-
         EventEmitter.call(this);
 
         this.options = assign({}, CoinsLogonWidget.DEFAULTS, options);
@@ -78,12 +76,10 @@
 
         // Configure auth
         if (this.options.baseUrl) {
-            authOptions.baseUrl = this.options.baseUrl;
+            Auth.setOptions({
+                baseUrl: this.options.baseUrl
+            });
         }
-        if (this.options.version) {
-            authOptions.version = this.options.version;
-        }
-        Auth.setOptions(authOptions);
 
         this.element = this._getElements(element);
         this._setState();

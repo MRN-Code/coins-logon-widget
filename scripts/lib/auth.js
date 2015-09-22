@@ -23,14 +23,10 @@
     /** Authentication credentials key for localStorage. */
     var AUTH_CREDENTIALS_KEY = 'COINS_AUTH_CREDENTIALS';
 
-    /** Default options. */
-    var DEFAULTS = {
-        baseUrl: '%NODEAPI_BASE_URL%',
-        version: '%NODEAPI_VERSION%',
-    };
-
     /** Local holder for options. */
-    var options = {};
+    var options = {
+        baseUrl: ''
+    };
 
     /**
      * Get saved authentication credentials.
@@ -79,7 +75,7 @@
      */
     function getApiUrl(endpoint) {
         var options = getOptions();
-        return options.baseUrl + '/v' + options.version + endpoint;
+        return options.baseUrl + endpoint;
     }
 
     /**
@@ -98,7 +94,7 @@
      * @return {object}
      */
     function setOptions(newOptions) {
-        options = assign({}, DEFAULTS, options, newOptions);
+        assign(options, newOptions);
         return getOptions();
     }
 
