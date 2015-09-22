@@ -4,7 +4,8 @@
 module.exports = function(grunt) {
     require('load-grunt-tasks')(grunt);
 
-    var NODEAPI_VERSION = grunt.file.readJSON('./node_modules/nodeapi/package.json').version;
+    var NODEAPI_VERSION = '1.3.0';
+    var NODEAPI_BASE_URL = 'https://localcoin.mrn.org:8443/api';
 
     grunt.initConfig({
         config: {
@@ -61,6 +62,12 @@ module.exports = function(grunt) {
             },
         },
         sed: {
+            baseUrl: {
+                pattern: '%NODEAPI_BASE_URL%',
+                replacement: NODEAPI_BASE_URL,
+                recursive: true,
+                path: '<%= config.distDir %>'
+            },
             requirejs: {
                 pattern: /\ndefine\("hawk.*\n/g,
                 replacement: '\n',
@@ -114,7 +121,6 @@ module.exports = function(grunt) {
         uglify: {
             options: {
                 mangle: true
-                // screwIE8: true
             },
             dist: {
                 files: {

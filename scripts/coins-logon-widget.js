@@ -56,9 +56,9 @@
         LOGOUT_SUCCESS: 'logout:success'
     };
 
-    var auth;
-
     function CoinsLogonWidget(element, options) {
+        var authOptions = {};
+
         EventEmitter.call(this);
 
         this.options = assign({}, CoinsLogonWidget.DEFAULTS, options);
@@ -76,9 +76,14 @@
             });
         }
 
-        // Configure auth, SDK client
-        // TODO: Enable passing of more options
-        auth = Auth({ baseUrl: this.options.baseUrl });
+        // Configure auth
+        if (this.options.baseUrl) {
+            authOptions.baseUrl = this.options.baseUrl;
+        }
+        if (this.options.version) {
+            authOptions.version = this.options.version;
+        }
+        Auth.setOptions(authOptions);
 
         this.element = this._getElements(element);
         this._setState();
@@ -140,7 +145,7 @@
 
         this.form.setLoading();
 
-        auth.login(formData.username, formData.password)
+        Auth.login(formData.username, formData.password)
             .then(function(response) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGIN_SUCCESS, response);
@@ -156,7 +161,7 @@
 
         this.form.setLoading();
 
-        auth.logout()
+        Auth.logout()
             .then(function(response) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGOUT_SUCCESS, response);
@@ -181,10 +186,10 @@
     };
 
     CoinsLogonWidget.prototype.onLogin = function(response) {
-        var username = ((((response || {}).body || {}).data || [])[0] || {}).username || '';
+        var username = response.username;
         var statusText = username ?
             'Logged in as <strong>' + username + '</strong>.' :
-            '';
+            'Logged in.';
 
         this.form.setToLogout(statusText);
     };

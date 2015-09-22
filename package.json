@@ -33,7 +33,6 @@
   "dependencies": {
     "es6-object-assign": "^1.0.1",
     "hawk": "^3.1.0",
-    "nodeapi": "mrn-code/nodeapi#develop",
     "rename-keys": "^1.1.2",
     "unique-number": "^2.0.1",
     "wolfy87-eventemitter": "^4.2.11"

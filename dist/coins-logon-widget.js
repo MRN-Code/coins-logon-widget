@@ -1166,493 +1166,11 @@ if (typeof module !== 'undefined' && module.exports) {
 // $lab:coverage:on$
 ;
 
-(function () {
-  'use strict';
-
-  function rename(obj, fn) {
-    if (typeof fn !== 'function') {
-      return obj;
-    }
-
-    var res = {};
-    for (var key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        res[fn(key) || key] = obj[key];
-      }
-    }
-    return res;
-  }
-
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = rename;
-  } else {
-    if (typeof define === 'function' && define.amd) {
-      define('rename-keys',[], function () {
-        return rename;
-      });
-    } else {
-      window.rename = rename;
-    }
-  }
-})();
-
-/* jshint strict:false */
-/* global define */
-
-(function(root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define('nodeapi/test/sdk/authentication',[], factory(btoa));
-    } else if (typeof module === 'object' && module.exports) {
-        // Node. Does not work with strict CommonJS, but
-        // only CommonJS-like environments that support module.exports,
-        // like Node.
-        var base64 = (function() {
-            if (typeof btoa !== 'undefined') {
-                return btoa;
-            }
-
-            return require('btoa');
-        })();
-
-        module.exports = factory(base64);
-    } else {
-        // Browser globals (root is window)
-        root.CoinsApiClient = root.CoinsApiClient || {};
-        root.CoinsApiClient.authentication = factory(root.btoa);
-    }
-}(this, function(btoa) {
-
-    'use strict';
-
-    var baseUri = '/auth';
-
-    var me;
-
-    /**
-     * generate the authentication payload expected by POST /auth/keys route
-     * @param  {string} username
-     * @param  {string} password
-     * @return {object} object to be sent as POST data to /auth/keys
-     */
-    function generateLoginPayload(username, password) {
-        return {
-            username: btoa(username),
-            password: btoa(password)
-        };
-    }
-
-    /**
-     * attempt to login to the API. This sets the API credentials
-     * @param  {string} username is the username to login with
-     * @param  {string} password is the password to login with
-     * @return {Promise}         a promise that resolves to server response
-     *                           or rejects with an error, where error.data
-     *                           contains the full response object
-     */
-    function login(username, password) {
-        var authPayload = generateLoginPayload(username, password);
-        var request = {
-            method: 'POST',
-            uri: baseUri + '/keys',
-            body: authPayload
-        };
-        return me.makeRequest(request, false)
-            .then(function(response) {
-                var err;
-                if (response.statusCode !== 200) {
-                    err = new Error(response.body.error.message);
-                    err.data = response;
-                    throw err;
-                } else {
-                    return me.setAuthCredentials(response.body.data[0])
-                        .then(function() { return response; });
-                }
-            });
-    }
-
-    /**
-     * logout of the application
-     * @param  {string} id     (optional) is the id to logout.
-     *                         defaults to the currently logged in ID.
-     * @return {Promise}       a promise that resolves to server response
-     *                         or rejects with an error, where error.data
-     *                         contains the full response object
-     */
-    function logout(id) {
-        /**
-         * set options and send request
-         * @param  {object} credentials hawk credentials object
-         * @return {Promise}             resolves to response
-         */
-        var sendRequest = function(credentials) {
-            id = id || credentials.id;
-            var uri = baseUri + '/keys/' + id;
-            var method = 'DELETE';
-            var request = {
-                method: method,
-                uri: uri
-            };
-            return me.makeRequest(request, true);
-        };
-
-        /**
-         * handle response from server: throwing an error if needed
-         * also unsets the local store of credentials
-         * @param  {object} response the response sent back from the server
-         * @return {Promise}          resolves to the response object
-         */
-        var handleResponse = function(response) {
-            var loggedOutCreds = { status: 'logged out', date: Date.now() };
-            var err;
-
-            /**
-             * convenience function to return the response
-             * @return {object} response object
-             */
-            var returnResponse = function() {
-                return response;
-            };
-
-            if (response.statusCode !== 200) {
-                err = new Error(response.body.error.message);
-                err.data = response;
-                throw err;
-            }
-
-            return me.setAuthCredentials(loggedOutCreds)
-                .then(returnResponse);
-        };
-
-        return me.getAuthCredentials()
-            .then(sendRequest)
-            .then(handleResponse);
-    }
-
-    /**
-     * initialize the internals with the config from index.js
-     * @param  {object} config the config object from index.js
-     * @return {null}        nothing
-     */
-    function init(base) {
-        me = base;
-        return {
-            login: login,
-            logout: logout
-        };
-    }
-
-    return init;
-}));
-
-/* jshint strict:false */
-/* global define */
-
-(function(root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define('nodeapi/test/sdk/scans',[], factory);
-    } else if (typeof module === 'object' && module.exports) {
-        // Node. Does not work with strict CommonJS, but
-        // only CommonJS-like environments that support module.exports,
-        // like Node.
-        module.exports = factory();
-    } else {
-        // Browser globals (root is window)
-        root.CoinsApiClient = root.CoinsApiClient || {};
-        root.CoinsApiClient.scans = factory();
-    }
-}(this, function() {
-
-    'use strict';
-
-    var me;
-    var baseUri = '/scans';
-
-    /**
-     * get scans
-     * @param  {object} queryParameters: optional object of query parameters
-     *                                   See swagger docs for accepted
-     *                                   parameters
-     * @return {Promise}         a promise that resolves to server response
-     *                           or rejects with an error, where error.data
-     *                           contains the full response object
-     */
-    function getScans(queryParameters) {
-        queryParameters = queryParameters || {};
-
-        var request = {
-            method: 'GET',
-            uri: baseUri,
-            qs: queryParameters
-        };
-
-        return me.makeRequest(request, true)
-            .then(function(response) {
-                var err;
-                if (response.statusCode !== 200) {
-                    err = new Error(response.body.error.message);
-                    err.data = response;
-                    throw err;
-                } else {
-                    return response;
-                }
-            });
-    }
-
-    /**
-     * initialize the internals with the config from index.js
-     * @param  {object} config the config object from index.js
-     * @return {null}        nothing
-     */
-    function init(base) {
-        me = base;
-        return {
-            get: getScans
-        };
-    }
-
-    return init;
-}));
-
-/* jshint strict:false */
-/* global define */
-
-(function(root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        define('nodeapi/test/sdk/index',[
-            'es6-object-assign',
-            'hawk',
-            'rename-keys',
-            './authentication',
-            './scans'
-        ], function(
-            ObjectAssign,
-            hawk,
-            rename,
-            authentication,
-            scans
-        ) {
-            return factory(
-                ObjectAssign.assign,
-                hawk,
-                rename,
-                localStorage,
-                authentication,
-                scans
-            );
-        });
-    } else if (typeof module === 'object' && module.exports) {
-        // Node. Does not work with strict CommonJS, but
-        // only CommonJS-like environments that support module.exports,
-        // like Node.
-        var storage = (function() {
-            if (typeof localStorage !== 'undefined') {
-                return localStorage;
-            }
-
-            var Storage = require('dom-storage');
-
-            return new Storage(null, { strict: true });
-        })();
-
-        module.exports = factory(
-            require('es6-object-assign').assign,
-            require('hawk/lib/browser.js'),
-            require('rename-keys'),
-            storage,
-            require('./authentication'),
-            require('./scans')
-        );
-
-    } else {
-        // Browser globals (root is window)
-        root.CoinsApiClient = factory(
-            root.ObjectAssign.assign,
-            root.hawk,
-            root.rename,
-            root.localStorage,
-            root.CoinsApiClient.authentication,
-            root.CoinsApiClient.scans
-        );
-
-    }
-}(this, function(
-
-    assign,
-    hawk,
-    renameKeys,
-    localStorage,
-    authentication,
-    scans
-) {
-    'use strict';
-
-    // TODO use semver to autmatically append to url
-    var hawkClientHeader = hawk.client.header;
-    var authKeyId = 'COINS_AUTH_CREDENTIALS';
-    var defaultConfig = {
-        requestFn: null,
-        requestObjectMap: {
-            method: 'method',
-            body: 'body',
-            headers: 'headers',
-            uri: 'uri'
-        },
-        baseUrl: 'https://coins-api.mrn.org/api',
-        version: null,
-        formatRequestHeaders: function(value) {
-            return value;
-        },
-
-        formatResponseCallback: function(respArray) {
-            respArray[0].body = JSON.parse(respArray[0].body);
-            return respArray[0];
-        }
-    };
-    var me = {};
-
-    /**
-     * get the currently stored auth credentials
-     * @return {Promise}        resolves to the credentials object
-     */
-    var getAuthCredentials = function() {
-        return new Promise(function(resolve) {
-            resolve(JSON.parse(localStorage.getItem(authKeyId)));
-        });
-    };
-
-    /**
-     * set auth credentials
-     * @param  {object} val the credentials to be saved
-     * @return {Promise}    resolves to an object containing the id and rev
-     */
-    var setAuthCredentials = function(credentials) {
-        return new Promise(function(resolve) {
-            localStorage.setItem(authKeyId, JSON.stringify(credentials));
-            resolve(getAuthCredentials());
-        });
-    };
-
-    /**
-     * generate the header expected by Hawk.
-     * Note that the url must include a protocol and hostname
-     * @param  {string} url
-     * @param  {string} method e.g. 'GET'
-     * @return {string} The hawk auth signature
-     */
-    var generateHawkHeader = function(url, method) {
-        return me.getAuthCredentials()
-            .then(function(credentials) {
-                if (!credentials) {
-                    throw new Error('No credentials found to sign with');
-                }
-
-                return me.getHawkHeader(
-                    url,
-                    method,
-                    { credentials: credentials }
-                );
-            });
-    };
-
-    /**
-     * format requestObj for use by requestFn
-     * @param  {object} requestObj the object to be passed to the requestFn
-     * @return {object}            the object after mapping keys to new ones
-     */
-    var formatRequestOptions = function(requestOptions) {
-        if (me.config.onPreFormatRequestOptions instanceof Function) {
-            requestOptions = me.config.onPreFormatRequestOptions(
-                requestOptions
-            );
-        }
-
-        requestOptions.uri = [
-            me.config.baseUrl,
-            '/v' + me.config.version,
-            requestOptions.uri
-        ].join('');
-
-        return renameKeys(requestOptions, function(key) {
-            return me.config.requestObjectMap[key] || key;
-        });
-    };
-
-    /**
-     * make a request using config.requestFn
-     * @param  {object} options request options to be passed to requestFn
-     * @return {Promise}        promise that resolves with the value of the
-     *                          response
-     */
-    var makeRequest = function(options, sign) {
-        var formattedOptions = formatRequestOptions(options);
-
-        /**
-         * convenience function for sending the formatted request
-         * @return {Promise} resolves to the formatted response value
-         */
-        var sendRequest = function() {
-            return me.config.requestFn(formattedOptions)
-                .then(me.config.formatResponseCallback);
-        };
-
-        /**
-         * convenience function for adding a header property to the
-         * formattedOptions
-         * @param  {object} header output from hawk.client.header();
-         * @return {null}        nothing
-         */
-        var addFormattedHeader = function(header) {
-            var headers = formattedOptions.headers || [];
-            headers.push({
-                name: 'Authorization',
-                value: header.field
-            });
-            formattedOptions.headers = me.config.formatRequestHeaders(headers);
-            return;
-        };
-
-        var masterPromise;
-        if (sign !== false) {
-            masterPromise = generateHawkHeader(
-                formattedOptions.url,
-                formattedOptions.method
-            )
-                .then(addFormattedHeader);
-        } else {
-            masterPromise = Promise.resolve();
-        }
-
-        return masterPromise.then(sendRequest);
-    };
-
-    return function init(config) {
-        me.config = assign({}, defaultConfig, config);
-        me.getHawkHeader = hawkClientHeader;
-        me.generateHawkHeader = generateHawkHeader;
-        me.makeRequest = makeRequest;
-        me.setAuthCredentials = setAuthCredentials;
-        me.getAuthCredentials = getAuthCredentials;
-        me.auth = authentication(me);
-        me.scans = scans(me);
-        return me;
-    };
-}));
-
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define('coins-logon-widget/scripts/lib/auth',[
-            'es6-object-assign',
-            'nodeapi/test/sdk/index'
-        ], function(ObjectAssign, CoinsApiClient) {
-            return factory(
-                ObjectAssign.assign,
-                CoinsApiClient,
-                '1.2.0'
-            );
+        define('coins-logon-widget/scripts/lib/auth',['es6-object-assign', 'hawk'], function(ObjectAssign, hawk) {
+            return factory(ObjectAssign.assign, hawk);
         });
     } else if (typeof module === 'object' && module.exports) {
         // Node. Does not work with strict CommonJS, but
@@ -1660,72 +1178,199 @@ if (typeof module !== 'undefined' && module.exports) {
         // like Node.
         module.exports = factory(
             require('es6-object-assign').assign,
-            require('nodeapi/test/sdk'),
-            require('nodeapi/package.json').version
+            require('hawk/lib/browser')
         );
     } else {
         // Browser globals (root is window)
         root.CoinsLogonWidget = root.CoinsLogonWidget || {};
-        root.CoinsLogonWidget.Auth = factory(
-            root.ObjectAssign.assign,
-            root.CoinsApiClient,
-            '1.2.0'
-        );
+        root.CoinsLogonWidget.Auth = factory(root.ObjectAssign.assign, hawk);
     }
-}(this, function (assign, Client, version) {
+}(this, function (assign) {
     'use strict';
 
+    /** Authentication credentials key for localStorage. */
+    var AUTH_CREDENTIALS_KEY = 'COINS_AUTH_CREDENTIALS';
+
+    /** Default options. */
     var DEFAULTS = {
-        formatResponseCallback: function(response) {
-            return response;
-        },
-        requestFn: function(options) {
-            var body = options.body || {};
-            var method = options.method || 'GET';
-            var url = options.uri || '';
-
-            return new Promise(function(resolve, reject) {
-                var options = {
-                    url: url,
-                    type: method,
-                    xhrFields: {
-                        withCredentials: true
-                    },
-                    success: function(data, textStatus, jqXHR) {
-                        resolve({
-                            body: {
-                                data: data.data
-                            },
-                            statusCode: jqXHR.status
-                        });
-                    },
-                    error: function(jqXHR) {
-                        var statusText = jqXHR.statusText;
-                        var message= (JSON.parse(jqXHR.responseText) || {});
-                        message = (message.error || {}).message || '';
-                        reject(message || statusText);
-                    }
-                };
-
-                if (body && Object.keys(body).length) {
-                    options.data = body;
-                }
-
-                jQuery.ajax(options);
-            });
-        },
-        version: version
+        baseUrl: 'https://localcoin.mrn.org:8443/api',
+        version: '1.3.0',
     };
 
-    return function(options) {
-        if (typeof options === 'undefined') {
-            options = {};
+    /** Local holder for options. */
+    var options = {};
+
+    /**
+     * Get saved authentication credentials.
+     *
+     * @return {object}
+     */
+    function getAuthCredentials() {
+        return JSON.parse(localStorage.getItem(AUTH_CREDENTIALS_KEY));
+    }
+
+    /**
+     * Set authentication credentials.
+     *
+     * @param  {object} credentials
+     * @return {object}
+     */
+    function setAuthCredentials(credentials) {
+        localStorage.setItem(AUTH_CREDENTIALS_KEY, JSON.stringify(credentials));
+        return getAuthCredentials();
+    }
+
+    /**
+     * Get Hawk authentication credentials.
+     *
+     * @param  {string} url
+     * @param  {string} method
+     * @return {object}
+     */
+    function getHawkHeaders(url, method, credentials) {
+        var header = hawk.client.header(
+            url,
+            method,
+            { credentials:  getAuthCredentials() }
+        );
+
+        return {
+            Authorization: header.field,
+        };
+    }
+
+    /**
+     * Get a formatted API URL.
+     *
+     * @param  {string} endpoint
+     * @return {string}
+     */
+    function getApiUrl(endpoint) {
+        var options = getOptions();
+        return options.baseUrl + '/v' + options.version + endpoint;
+    }
+
+    /**
+     * Get options.
+     *
+     * @return {object}
+     */
+    function getOptions() {
+        return options;
+    }
+
+    /**
+     * Set options.
+     *
+     * @param  {object} newOptions
+     * @return {object}
+     */
+    function setOptions(newOptions) {
+        options = assign({}, DEFAULTS, options, newOptions);
+        return getOptions();
+    }
+
+    /**
+     * Map API's successful response.
+     *
+     * @param  {object} respones API response object
+     * @return {object}
+     */
+    function mapApiSuccess(response) {
+        return response.data[0];
+    }
+
+    /**
+     * Map API's error reponse.
+     *
+     * @param  {jqXHR}  error
+     * @return {object}
+     */
+    function mapApiError(error) {
+        var statusText = error.statusText;
+        var message;
+        if (error.responseText) { 
+            message = (JSON.parse(error.responseText) || {});
+            message = (message.error || {}).message || '';
         }
+        return message || statusText || 'Unknown error';
+    }
 
-        // Set up client
-        var client = Client(assign({}, DEFAULTS, options));
+    /**
+     * Log in.
+     *
+     * @param  {string}  username
+     * @param  {string}  password
+     * @return {Promise}
+     */
+    function login(username, password) {
+        return new Promise(function(resolve, reject) {
+            jQuery.ajax({
+                data: {
+                    password: btoa(password),
+                    username: btoa(username),
+                },
+                dataType: 'json',
+                type: 'POST',
+                url: getApiUrl('/auth/keys'),
+                xhrFields: {
+                    withCredentials: true
+                },
+            })
+                .done(function(response) {
+                    var credentials = mapApiSuccess(response);
+                    setAuthCredentials(credentials);
+                    resolve(credentials);
+                })
+                .fail(function(error) {
+                    reject(mapApiError(error));
+                });
+        });
+    }
 
-        return client.auth;
+    /**
+     * Log out.
+     *
+     * @return {Promise}
+     */
+    function logout() {
+        return new Promise(function(resolve, reject) {
+            var id = getAuthCredentials().id;
+            var method = 'DELETE';
+            var url = getApiUrl('/auth/keys/' + id);
+
+            return jQuery.ajax({
+                dataType: 'json',
+                headers: getHawkHeaders(url, method),
+                type: method,
+                url: getApiUrl('/auth/keys/' + id),
+                xhrFields: {
+                    withCredentials: true
+                },
+            })
+                .done(function(response) {
+                    resolve(mapApiSuccess(response));
+                })
+                .fail(function(error) {
+                    reject(mapApiError(error));
+                })
+                .always(function() {
+                    return setAuthCredentials({
+                        date: Date.now(),
+                        status: 'logged out',
+                    });
+                });
+        });
+    }
+
+    /**
+     * Public API.
+     */
+    return {
+        getOptions: getOptions,
+        setOptions: setOptions,
+        login: login,
+        logout: logout,
     };
 }));
 
@@ -2144,7 +1789,7 @@ if (typeof module !== 'undefined' && module.exports) {
                 circle.setAttribute(prop, circleAttributes[prop]);
             }
         }
- 
+
         svg.appendChild(title);
         svg.appendChild(circle);
         indicator.appendChild(svg);
@@ -2168,7 +1813,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
         // Notification
         if (notification && !state.notification) {
-            this.element.removeChild(notification);
+            utils.removeElement(notification);
         } else if (!notification && state.notification) {
             notification = document.createElement('div');
             notification.className = this.options.classNames.notification;
@@ -2177,7 +1822,11 @@ if (typeof module !== 'undefined' && module.exports) {
         }
 
         if (notification && state.notification) {
-            notification.textContent = state.notification;
+            if (state.notification instanceof Node) {
+                notification.appendChild(state.notification);
+            } else {
+                notification.textContent = state.notification;
+            }
 
             notification.classList.remove(this.options.classNames.notificationError);
             notification.classList.remove(this.options.classNames.notificationSuccess);
@@ -2284,11 +1933,15 @@ if (typeof module !== 'undefined' && module.exports) {
     };
 
     Form.prototype.getFormData = function() {
-        return this.formGroups.map(function(formGroup) {
-            var data = {};
-            data[formGroup.getName()] = formGroup.getValue();
+        return this.formGroups.reduce(function(data, formGroup) {
+            var name = formGroup.getName();
+
+            if (!(name in data)) {
+                data[name] = formGroup.getValue();
+            }
+
             return data;
-        });
+        }, {});
     };
 
     Form.prototype.setErrorMessage = function(message) {
@@ -2433,9 +2086,9 @@ if (typeof module !== 'undefined' && module.exports) {
         LOGOUT_SUCCESS: 'logout:success'
     };
 
-    var auth;
-
     function CoinsLogonWidget(element, options) {
+        var authOptions = {};
+
         EventEmitter.call(this);
 
         this.options = assign({}, CoinsLogonWidget.DEFAULTS, options);
@@ -2453,9 +2106,14 @@ if (typeof module !== 'undefined' && module.exports) {
             });
         }
 
-        // Configure auth, SDK client
-        // TODO: Enable passing of more options
-        auth = Auth({ baseUrl: this.options.baseUrl });
+        // Configure auth
+        if (this.options.baseUrl) {
+            authOptions.baseUrl = this.options.baseUrl;
+        }
+        if (this.options.version) {
+            authOptions.version = this.options.version;
+        }
+        Auth.setOptions(authOptions);
 
         this.element = this._getElements(element);
         this._setState();
@@ -2507,7 +2165,6 @@ if (typeof module !== 'undefined' && module.exports) {
     CoinsLogonWidget.prototype.login = function(formData) {
         var self = this;
         var validations = self.form.validate();
-        var data;
 
         if (validations !== true) {
             self.emit(EVENTS.INVALID, validations);
@@ -2516,11 +2173,9 @@ if (typeof module !== 'undefined' && module.exports) {
             self.form.clearMessage();
         }
 
-        data = assign.apply(null, formData);
-
         this.form.setLoading();
 
-        auth.login(data.username, data.password)
+        Auth.login(formData.username, formData.password)
             .then(function(response) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGIN_SUCCESS, response);
@@ -2536,7 +2191,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
         this.form.setLoading();
 
-        auth.logout()
+        Auth.logout()
             .then(function(response) {
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGOUT_SUCCESS, response);
@@ -2561,10 +2216,10 @@ if (typeof module !== 'undefined' && module.exports) {
     };
 
     CoinsLogonWidget.prototype.onLogin = function(response) {
-        var username = ((((response || {}).body || {}).data || [])[0] || {}).username || '';
+        var username = response.username;
         var statusText = username ?
             'Logged in as <strong>' + username + '</strong>.' :
-            '';
+            'Logged in.';
 
         this.form.setToLogout(statusText);
     };
