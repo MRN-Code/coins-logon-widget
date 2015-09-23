@@ -96,7 +96,6 @@ module.exports = function(grunt) {
                         'Ajax': '@fdaciuk/ajax/dist/ajax.min',
                         'coins-logon-widget': '../',
                         'es6-object-assign': 'es6-object-assign/dist/object-assign',
-                        'hawk': 'hawk/lib/browser',
                         'rename-keys': 'rename-keys/index',
                         'unique-number': 'unique-number/index'
                     }

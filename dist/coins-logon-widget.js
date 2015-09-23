@@ -1169,7 +1169,10 @@ if (typeof module !== 'undefined' && module.exports) {
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define('coins-logon-widget/scripts/lib/auth',['es6-object-assign', 'hawk'], function(ObjectAssign, hawk) {
+        define('coins-logon-widget/scripts/lib/auth',[
+            'es6-object-assign',
+            'hawk/lib/browser'
+        ], function(ObjectAssign, hawk) {
             return factory(ObjectAssign.assign, hawk);
         });
     } else if (typeof module === 'object' && module.exports) {
@@ -1183,9 +1186,12 @@ if (typeof module !== 'undefined' && module.exports) {
     } else {
         // Browser globals (root is window)
         root.CoinsLogonWidget = root.CoinsLogonWidget || {};
-        root.CoinsLogonWidget.Auth = factory(root.ObjectAssign.assign, hawk);
+        root.CoinsLogonWidget.Auth = factory(
+            root.ObjectAssign.assign,
+            root.hawk
+        );
     }
-}(this, function (assign) {
+}(this, function (assign, hawk) {
     'use strict';
 
     /** Authentication credentials key for localStorage. */
