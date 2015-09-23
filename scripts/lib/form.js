@@ -33,9 +33,6 @@
         options = options || {};
 
         this.options = assign({}, Form.DEFAULTS, options);
-        // this.formGroups = this.options.formGroups.map(function(formGroupOptions) {
-        //     return new FormGroup(formGroupOptions);
-        // });
         this.element = this._getElements();
         this._setState(this.options.initialState);
     }
