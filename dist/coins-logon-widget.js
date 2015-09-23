@@ -1964,9 +1964,10 @@ if (typeof module !== 'undefined' && module.exports) {
 
     Form.prototype.destroy = function() {
         this.element.removeEventListener('submit', this._submitHandler, false);
-        utils.removeElement(this.element);
         this._removeFormGroups();
+        utils.removeElement(this.element);
 
+        delete this._state;
         delete this.options;
     };
 
@@ -2209,6 +2210,14 @@ if (typeof module !== 'undefined' && module.exports) {
         this.on(EVENTS.LOGOUT, this.logout);
         this.on(EVENTS.LOGOUT_ERROR, this.onError);
         this.on(EVENTS.LOGOUT_SUCCESS, this.onLogout);
+    };
+
+    CoinsLogonWidget.prototype.destroy = function() {
+        this.form.destroy();
+        delete this.form;
+        this.removeAllListeners();
+        delete this.options;
+        delete this.element;
     };
 
     CoinsLogonWidget.prototype.login = function(formData) {

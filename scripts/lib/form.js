@@ -228,9 +228,10 @@
 
     Form.prototype.destroy = function() {
         this.element.removeEventListener('submit', this._submitHandler, false);
-        utils.removeElement(this.element);
         this._removeFormGroups();
+        utils.removeElement(this.element);
 
+        delete this._state;
         delete this.options;
     };
 

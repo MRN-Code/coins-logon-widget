@@ -143,6 +143,14 @@
         this.on(EVENTS.LOGOUT_SUCCESS, this.onLogout);
     };
 
+    CoinsLogonWidget.prototype.destroy = function() {
+        this.form.destroy();
+        delete this.form;
+        this.removeAllListeners();
+        delete this.options;
+        delete this.element;
+    };
+
     CoinsLogonWidget.prototype.login = function(formData) {
         var self = this;
         var validations = self.form.validate();
