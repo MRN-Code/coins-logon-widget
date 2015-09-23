@@ -55,11 +55,17 @@
         INVALID: 'invalid',
         LOGIN: 'login:init',
         LOGIN_ERROR: 'login:error',
+        LOGIN_ACCOUNT_EXPIRED: 'login:accountExpired',
+        LOGIN_ACCOUNT_WILL_EXPIRE: 'login:accountWillExpire',
+        LOGIN_PASSWORD_EXPIRED: 'login:passwordExpired',
+        LOGIN_PASSWORD_WILL_EXPIRE: 'login:passwordWillExpire',
         LOGIN_SUCCESS: 'login:success',
         LOGOUT: 'logout:init',
         LOGOUT_ERROR: 'logout:error',
         LOGOUT_SUCCESS: 'logout:success'
     };
+
+    var day = 24 * 60 * 60 * 1000;
 
     function CoinsLogonWidget(element, options) {
         EventEmitter.call(this);
@@ -127,6 +133,10 @@
     CoinsLogonWidget.prototype._setState = function() {
         this.on(EVENTS.LOGIN, this.login);
         this.on(EVENTS.LOGIN_ERROR, this.onError);
+        this.on(EVENTS.LOGIN_ACCOUNT_EXPIRED, this.onAccountExpired);
+        this.on(EVENTS.LOGIN_ACCOUNT_WILL_EXPIRE, this.onAccountWillExpire);
+        this.on(EVENTS.LOGIN_PASSWORD_EXPIRED, this.onPasswordExpired);
+        this.on(EVENTS.LOGIN_PASSWORD_WILL_EXPIRE, this.onPasswordWillExpire);
         this.on(EVENTS.LOGIN_SUCCESS, this.onLogin);
         this.on(EVENTS.LOGOUT, this.logout);
         this.on(EVENTS.LOGOUT_ERROR, this.onError);
@@ -154,39 +164,19 @@
                  * expired the widget needs to handle it here.
                  */
                 var accountExpiration = Date.parse(response.user.acctExpDate);
-                var day = 24 * 60 * 60 * 1000;
-                var messages = self.options.messages;
                 var now = Date.now();
                 var passwordExpiration = Date.parse(response.user.passwordExpDate);
 
                 self.form.clearLoading();
 
                 if (accountExpiration - now < 0) {
-                    self.emit(
-                        EVENTS.LOGIN_ERROR,
-                        utils.callOrReturn(messages.accountExpired)
-                    );
+                    self.emit(EVENTS.LOGIN_ACCOUNT_EXPIRED, response);
                 } else if (accountExpiration - now < day * 10) {
-                    self.emit(
-                        EVENTS.LOGIN_ERROR,
-                        utils.callOrReturn(
-                            messages.accountWillExpire,
-                            [utils.formatDay((accountExpiration - now) / day)]
-                        )
-                    );
+                    self.emit(EVENTS.LOGIN_ACCOUNT_WILL_EXPIRE, response);
                 } else if (passwordExpiration - now < 0) {
-                    self.emit(
-                        EVENTS.LOGIN_ERROR,
-                        utils.callOrReturn(messages.passwordExpired)
-                    );
+                    self.emit(EVENTS.PASSWORD_EXPIRED, response);
                 } else if (passwordExpiration - now < day * 10) {
-                    self.emit(
-                        EVENTS.LOGIN_ERROR,
-                        utils.callOrReturn(
-                            messages.passwordWillExpire,
-                            [utils.formatDay((passwordExpiration - now) / day)]
-                        )
-                    );
+                    self.emit(EVENTS.LOGIN_PASSWORD_WILL_EXPIRE, response);
                 } else {
                     self.emit(EVENTS.LOGIN_SUCCESS, response);
                 }
@@ -211,6 +201,36 @@
                 self.form.clearLoading();
                 self.emit(EVENTS.LOGOUT_ERROR, error);
             });
+    };
+
+    CoinsLogonWidget.prototype.onAccountExpired = function(response) {
+        var message = utils.callOrReturn(this.options.messages.accountExpired);
+        this.form.setErrorMessage(message);
+    };
+
+    CoinsLogonWidget.prototype.onAccountWillExpire = function(response) {
+        var accountExpiration = Date.parse(response.user.acctExpDate);
+        var now = Date.now();
+        var message = utils.callOrReturn(
+            this.options.messages.accountWillExpire,
+            [utils.formatDay((accountExpiration - now) / day)]
+        );
+        this.form.setErrorMessage(message);
+    };
+
+    CoinsLogonWidget.prototype.onPasswordExpired = function(response) {
+        var message = utils.callOrReturn(this.options.messages.passwordExpired);
+        this.form.setErrorMessage(message);
+    };
+
+    CoinsLogonWidget.prototype.onPasswordWillExpire = function(response) {
+        var passwordExpiration = Date.parse(response.user.passwordExpDate);
+        var now = Date.now();
+        var message = utils.callOrReturn(
+            this.options.messages.passwordWillExpire,
+            [utils.formatDay((passwordExpiration - now) / day)]
+        );
+        this.form.setErrorMessage(message);
     };
 
     CoinsLogonWidget.prototype.onError = function(error) {
@@ -277,19 +297,13 @@
         hiddenLabels: false,
         horizontal: false,
         messages: {
-            accountExpired: 'Your account has expired. Please contact your ' +
-                'PR to regain access.',
+            accountExpired: 'Your account has expired.',
             accountWillExpire: function(offset) {
-                return 'Your account will expire in ' + offset + '. Please ' +
-                    'contact your PR to regain access.';
+                return 'Your account will expire in ' + offset + '.';
             },
-            passwordExpired: 'Your password has expired. Please <a href="' +
-                '/micis/index.php?subsite=changePassword">reset your password' +
-                '</a>.',
+            passwordExpired: 'Your password has expired.',
             passwordWillExpire: function(offset) {
-                return 'Your password will expire in ' + offset + '. Please ' +
-                    '<a href="/micis/index.php?subsite=changePassword">reset ' +
-                    'your password</a>.';
+                return 'Your password will expire in ' + offset + '.';
             }
         }
     };
