@@ -6,14 +6,112 @@ _Injectable utility to manage browser authorization with COINS._
 
 ```js
 var widget = new CoinsLogonWidget(document.getElementById('logon-area'), {
-    baseUrl: 'http://localhost:9000/api'
+    baseUrl: 'http://localhost:9000/api/v1'
 });
+```
 
-// events
-widget.on('login:success', function() {});
-widget.on('login:error', function() {});
-widget.on('logout:success', function() {});
-widget.on('logout:error', function() {});
+### Methods
+
+You may call these methods on an instance of the widget:
+
+#### Destroy
+
+Destroy the widget’s elements and remove all event handlers.
+
+```js
+widget.destroy()
+```
+
+### Events
+
+The widget extends [Olical’s EventEmitter](https://github.com/Olical/EventEmitter): all of [its methods](https://github.com/Olical/EventEmitter/blob/master/docs/api.md) are available on an instance of `CoinsLogonWidget`. The widget has a few custom events for which you can attach handlers:
+
+#### Invalid
+
+Fired when one or more of the widget’s form fields aren’t valid.
+
+```js
+widget.on('invalid', function(validations) {});
+```
+
+#### Login Init
+
+Fired when the widget begins a login API call.
+
+```js
+widget.on('login:init', function() {});
+```
+
+#### Login Error
+
+Fired when the widget receives an error from the login API call.
+
+```js
+widget.on('login:error', function(error) {});
+```
+
+#### Login Account Expired
+
+Fired when the widget receives an “account expired” response from the login API call.
+
+```js
+widget.on('login:accountExpired', function(apiResponse) {});
+```
+
+#### Login Account Will Expire
+
+Fired when the widget receives an “account will expire” response from the login API call.
+
+```js
+widget.on('login:accountWillExpire', function(apiResponse) {});
+```
+
+#### Login Password Expired
+
+Fired when the widget receives a “password expired” response from the login API call.
+
+```js
+widget.on('login:passwordExpired', function(apiResponse) {});
+```
+
+#### Login Password Will Expire
+
+Fired when the widget receives a “password will expire” response from the login API call.
+
+```js
+widget.on('login:passwordWillExpire', function(apiResponse) {});
+```
+
+#### Login Success
+
+Fired when the widget receives a successful response from the login API call.
+
+```js
+widget.on('login:success', function(apiResponse) {});
+```
+
+#### Logout Init
+
+Fired when the widget begins a logout API call.
+
+```js
+widget.on('logout:init', function() {});
+```
+
+#### Logout Error
+
+Fired when the widget receives an error response from the logout API call.
+
+```js
+widget.on('logout:error', function(error) {});
+```
+
+#### Logout Success
+
+Fired when the widget receives a successful response from the logout API call.
+
+```js
+widget.on( 'logout:success', function(apiResponse) {});
 ```
 
 See _examples/index.html_ for more examples of widget use.
