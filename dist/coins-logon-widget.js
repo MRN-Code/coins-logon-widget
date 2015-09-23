@@ -1823,7 +1823,7 @@ if (typeof module !== 'undefined' && module.exports) {
             if (state.notification instanceof Node) {
                 notification.appendChild(state.notification);
             } else {
-                notification.textContent = state.notification;
+                notification.innerHTML = state.notification;
             }
 
             notification.classList.remove(this.options.classNames.notificationError);

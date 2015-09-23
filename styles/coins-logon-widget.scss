@@ -283,10 +283,32 @@ input[type="text"] {
    ========================================================================== */
 
 .coins-logon-widget-notification {
+    $color: map-get($coins-logon-widget-colors, 'notification-color');
+
     border-radius: map-get($coins-logon-widget, 'border-radius');
-    color: map-get($coins-logon-widget-colors, 'notification-color');
+    color: $color;
     margin-bottom: 1em;
     padding: map-get($coins-logon-widget, 'padding');
+
+    a {
+        font-weight: map-get($coins-logon-widget, 'font-weight');
+        letter-spacing: 0;
+        text-decoration: underline;
+
+        &,
+        &:link,
+        &:visited,
+        &:focus,
+        &:hover,
+        &:active {
+            color: $color;
+        }
+        &:focus,
+        &:hover,
+        &:active {
+            opacity: .92;
+        }
+    }
 }
 
 @each $state in 'error', 'success' {
