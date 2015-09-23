@@ -93,22 +93,19 @@ module.exports = function(grunt) {
                     out: 'dist/coins-logon-widget.js',
                     optimize: 'none',
                     paths: {
-                        'Ajax': '@fdaciuk/ajax/dist/ajax.min',
                         'coins-logon-widget': '../',
                         'es6-object-assign': 'es6-object-assign/dist/object-assign',
-                        'rename-keys': 'rename-keys/index',
                         'unique-number': 'unique-number/index'
                     }
                 }
             }
         },
         uglify: {
-            options: {
-                mangle: true
-            },
             dist: {
                 files: {
-                    '<%= config.distDir %>/coins-logon-widget.min.js' : ['<%= config.distDir %>/*.js']
+                    '<%= config.distDir %>/coins-logon-widget.min.js' : [
+                        '<%= config.distDir %>/coins-logon-widget.js'
+                    ]
                 }
             }
         },

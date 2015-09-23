@@ -1465,6 +1465,38 @@ if (typeof module !== 'undefined' && module.exports) {
     var uniqueNumber = new UniqueNumber();
 
     /**
+     * Call or return a maybe callable argument.
+     *
+     * @param  {mixed} maybeCallable A callable or other primitive that should
+     *                               either be called with arguments or simply
+     *                               returned.
+     * @param  {array} args          Arguments to pass to `maybeCallable` if
+     *                               it is callable.
+     * @return {mixed}               Result of `maybeCallable` if it was
+     *                               callable, otherwise just the value itself.
+     */
+    function callOrReturn(maybeCallable, args) {
+        if (maybeCallable instanceof Function) {
+            return maybeCallable.apply(null, args);
+        }
+        return maybeCallable;
+    }
+
+    /**
+     * Format day string.
+     * 
+     * @param  {number} day
+     * @return {string}
+     */
+    function formatDay(day) {
+        if (day < 1) {
+            return 'less than 1 day';
+        } else {
+            return '' + Math.ceil(day) + ' days';
+        }
+    }
+
+    /**
      * Add event listener that fires once.
      * @{@link  https://github.com/insin/event-listener}
      */
@@ -1497,6 +1529,8 @@ if (typeof module !== 'undefined' && module.exports) {
     }
 
     return {
+        callOrReturn: callOrReturn,
+        formatDay: formatDay,
         once: once,
         removeElement: removeElement,
         uniqueId: uniqueId,
@@ -2040,14 +2074,16 @@ if (typeof module !== 'undefined' && module.exports) {
             'es6-object-assign',
             './lib/auth',
             './lib/form',
-            './lib/form-group'
-        ], function(EventEmitter, ObjectAssign, Auth, Form, FormGroup) {
+            './lib/form-group',
+            './lib/utils'
+        ], function(EventEmitter, ObjectAssign, Auth, Form, FormGroup, utils) {
             return factory(
                 EventEmitter,
                 ObjectAssign.assign,
                 Auth,
                 Form,
-                FormGroup
+                FormGroup,
+                utils
             );
         });
     } else if (typeof module === 'object' && module.exports) {
@@ -2059,7 +2095,8 @@ if (typeof module !== 'undefined' && module.exports) {
             require('es6-object-assign').assign,
             require('./lib/auth'),
             require('./lib/form'),
-            require('./lib/form-group')
+            require('./lib/form-group'),
+            require('./lib/utils')
         );
     } else {
         // Browser globals (root is window)
@@ -2068,7 +2105,8 @@ if (typeof module !== 'undefined' && module.exports) {
             root.ObjectAssign.assign,
             root.CoinsLogonWidget.Auth,
             root.CoinsLogonWidget.Form,
-            root.CoinsLogonWidget.FormGroup
+            root.CoinsLogonWidget.FormGroup,
+            root.CoinsLogonWidget.utils
         );
     }
 }(this, function (
@@ -2076,7 +2114,8 @@ if (typeof module !== 'undefined' && module.exports) {
     assign,
     Auth,
     Form,
-    FormGroup
+    FormGroup,
+    utils
 ) {
     'use strict';
 
@@ -2177,8 +2216,48 @@ if (typeof module !== 'undefined' && module.exports) {
 
         Auth.login(formData.username, formData.password)
             .done(function(response) {
+                /**
+                 * Successful authentication also contains information regarding
+                 * a user's account status. If the user's password or account is
+                 * expired the widget needs to handle it here.
+                 */
+                var accountExpiration = Date.parse(response.user.acctExpDate);
+                var day = 24 * 60 * 60 * 1000;
+                var messages = self.options.messages;
+                var now = Date.now();
+                var passwordExpiration = Date.parse(response.user.passwordExpDate);
+
                 self.form.clearLoading();
-                self.emit(EVENTS.LOGIN_SUCCESS, response);
+
+                if (accountExpiration - now < 0) {
+                    self.emit(
+                        EVENTS.LOGIN_ERROR,
+                        utils.callOrReturn(messages.accountExpired)
+                    );
+                } else if (accountExpiration - now < day * 10) {
+                    self.emit(
+                        EVENTS.LOGIN_ERROR,
+                        utils.callOrReturn(
+                            messages.accountWillExpire,
+                            [utils.formatDay((accountExpiration - now) / day)]
+                        )
+                    );
+                } else if (passwordExpiration - now < 0) {
+                    self.emit(
+                        EVENTS.LOGIN_ERROR,
+                        utils.callOrReturn(messages.passwordExpired)
+                    );
+                } else if (passwordExpiration - now < day * 10) {
+                    self.emit(
+                        EVENTS.LOGIN_ERROR,
+                        utils.callOrReturn(
+                            messages.passwordWillExpire,
+                            [utils.formatDay((passwordExpiration - now) / day)]
+                        )
+                    );
+                } else {
+                    self.emit(EVENTS.LOGIN_SUCCESS, response);
+                }
             })
             .fail(function(error) {
                 self.form.clearLoading();
@@ -2264,7 +2343,23 @@ if (typeof module !== 'undefined' && module.exports) {
             type: 'password'
         }],
         hiddenLabels: false,
-        horizontal: false
+        horizontal: false,
+        messages: {
+            accountExpired: 'Your account has expired. Please contact your ' +
+                'PR to regain access.',
+            accountWillExpire: function(offset) {
+                return 'Your account will expire in ' + offset + '. Please ' +
+                    'contact your PR to regain access.';
+            },
+            passwordExpired: 'Your password has expired. Please <a href="' +
+                '/micis/index.php?subsite=changePassword">reset your password' +
+                '</a>.',
+            passwordWillExpire: function(offset) {
+                return 'Your password will expire in ' + offset + '. Please ' +
+                    '<a href="/micis/index.php?subsite=changePassword">reset ' +
+                    'your password</a>.';
+            }
+        }
     };
 
     return CoinsLogonWidget;
