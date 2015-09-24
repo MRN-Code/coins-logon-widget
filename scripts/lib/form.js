@@ -156,7 +156,6 @@
                     .map(function(formGroup) {
                         return formGroup.element;
                     })
-                    .reverse()
                     .forEach(function(formGroupElement){
                         self.element.insertBefore(formGroupElement, indicator);
                     });

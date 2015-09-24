@@ -1892,7 +1892,6 @@ if (typeof module !== 'undefined' && module.exports) {
                     .map(function(formGroup) {
                         return formGroup.element;
                     })
-                    .reverse()
                     .forEach(function(formGroupElement){
                         self.element.insertBefore(formGroupElement, indicator);
                     });
@@ -2179,7 +2178,7 @@ if (typeof module !== 'undefined' && module.exports) {
         var self = this;
 
         this.form = new Form({
-            formGroups: this.options.formGroups.reverse(),
+            formGroups: this.options.formGroups,
             horizontal: this.options.horizontal,
             login: function() {
                 self.emit(EVENTS.LOGIN, self.form.getFormData());

@@ -113,7 +113,7 @@
         var self = this;
 
         this.form = new Form({
-            formGroups: this.options.formGroups.reverse(),
+            formGroups: this.options.formGroups,
             horizontal: this.options.horizontal,
             login: function() {
                 self.emit(EVENTS.LOGIN, self.form.getFormData());
