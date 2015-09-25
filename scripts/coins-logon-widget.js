@@ -177,12 +177,8 @@
 
                 self.form.clearLoading();
 
-                if (accountExpiration - now < 0) {
-                    self.emit(EVENTS.LOGIN_ACCOUNT_EXPIRED, response);
-                } else if (accountExpiration - now < day * 10) {
+                if (accountExpiration - now < day * 10) {
                     self.emit(EVENTS.LOGIN_ACCOUNT_WILL_EXPIRE, response);
-                } else if (passwordExpiration - now < 0) {
-                    self.emit(EVENTS.PASSWORD_EXPIRED, response);
                 } else if (passwordExpiration - now < day * 10) {
                     self.emit(EVENTS.LOGIN_PASSWORD_WILL_EXPIRE, response);
                 } else {
@@ -191,7 +187,13 @@
             })
             .fail(function(error) {
                 self.form.clearLoading();
-                self.emit(EVENTS.LOGIN_ERROR, error);
+                if (error === 'Password expired') {
+                    self.emit(EVENTS.LOGIN_PASSWORD_EXPIRED, error);
+                } else if (error === 'Account expired') {
+                    self.emit(EVENTS.LOGIN_ACCOUNT_EXPIRED, error);
+                } else {
+                    self.emit(EVENTS.LOGIN_ERROR, error);
+                }
             });
     };
 
