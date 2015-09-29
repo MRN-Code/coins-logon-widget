@@ -59,13 +59,14 @@
      *
      * @param  {string} url
      * @param  {string} method
+     * @param  {object} credentials
      * @return {object}
      */
     function getHawkHeaders(url, method, credentials) {
         var header = hawk.client.header(
             url,
             method,
-            { credentials:  getAuthCredentials() }
+            { credentials:  credentials }
         );
 
         return {
@@ -82,6 +83,28 @@
     function getApiUrl(endpoint) {
         var options = getOptions();
         return options.baseUrl + endpoint;
+    }
+
+    /**
+     * Remove the CAS_Auth_User cookie
+     *
+     * @return {null}
+     */
+    function removeAuthCookie() {
+        var cookieValue = 'REMOVED';
+        var domain = '.mrn.org';
+        var path = '/';
+        var name = 'CAS_Auth_User';
+        document.cookie = [
+            name,
+            '=',
+            cookieValue,
+            '; Path=',
+            path,
+            '; Domain=',
+            domain,
+            ';'
+        ].join('');
     }
 
     /**
@@ -123,7 +146,7 @@
     function mapApiError(error) {
         var statusText = error.statusText;
         var message;
-        if (error.responseText) { 
+        if (error.responseText) {
             message = (JSON.parse(error.responseText) || {});
             message = (message.error || {}).message || '';
         }
@@ -170,15 +193,15 @@
      */
     function logout() {
         var deferred = jQuery.Deferred();
-        var id = getAuthCredentials().id;
+        var credentials = getAuthCredentials();
         var method = 'DELETE';
-        var url = getApiUrl('/auth/keys/' + id);
+        var url = getApiUrl('/auth/keys/' + credentials.id);
 
         jQuery.ajax({
             dataType: 'json',
-            headers: getHawkHeaders(url, method),
+            headers: getHawkHeaders(url, method, credentials),
             type: method,
-            url: getApiUrl('/auth/keys/' + id),
+            url: url,
             xhrFields: {
                 withCredentials: true
             },
@@ -190,6 +213,7 @@
                 deferred.reject(mapApiError(error));
             })
             .always(function() {
+                removeAuthCookie();
                 return setAuthCredentials({
                     date: Date.now(),
                     status: 'logged out',
