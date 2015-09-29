@@ -59,13 +59,14 @@
      *
      * @param  {string} url
      * @param  {string} method
+     * @param  {object} credentials
      * @return {object}
      */
     function getHawkHeaders(url, method, credentials) {
         var header = hawk.client.header(
             url,
             method,
-            { credentials:  getAuthCredentials() }
+            { credentials:  credentials }
         );
 
         return {
@@ -198,9 +199,9 @@
 
         jQuery.ajax({
             dataType: 'json',
-            headers: getHawkHeaders(url, method),
+            headers: getHawkHeaders(url, method, credentials),
             type: method,
-            url: getApiUrl('/auth/keys/' + id),
+            url: url,
             xhrFields: {
                 withCredentials: true
             },
