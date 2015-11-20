@@ -1,0 +1,9 @@
+{
+    "before_tests": "rm test.bundle.js && webpack --config webpack.testem.config.js",
+    "framework": "tap",
+    "launch_in_dev": ["PhantomJS", "Chrome"],
+    "on_exit": "rm test.bundle.js",
+    "serve_files": [
+        "test.bundle.js"
+    ]
+}

@@ -2,7 +2,6 @@
 var assign = require('es6-object-assign').assign;
 var hawk = require('hawk/lib/browser');
 
-
 /** Authentication credentials key for localStorage. */
 var AUTH_CREDENTIALS_KEY = 'COINS_AUTH_CREDENTIALS';
 
@@ -127,6 +126,7 @@ function mapApiError(error) {
         message = (JSON.parse(error.responseText) || {});
         message = (message.error || {}).message || '';
     }
+
     return message || statusText || 'Unknown error';
 }
 
@@ -160,6 +160,7 @@ function login(username, password) {
         .fail(function(error) {
             deferred.reject(mapApiError(error));
         });
+
     return deferred.promise();
 }
 

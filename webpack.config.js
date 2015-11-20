@@ -7,14 +7,14 @@ var isDev = process.env.COINS_ENV === 'development';
 
 module.exports = {
     node: {
-        fs: "empty"
+        fs: 'empty'
     },
     entry: {
         'coins-logon-widget': './scripts/coins-logon-widget.js'
     },
     output: {
         path: path.join(__dirname + '/dist'),
-        filename: '[name].js', // one for each `entry`
+        filename: '[name].js',
         library: 'CoinsLogonWidget',
         libraryTarget: 'umd',
         umdNamedDefine: true,

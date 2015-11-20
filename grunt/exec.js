@@ -4,8 +4,8 @@ module.exports = function(grunt) {
         webpack: {
             command: 'webpack'
         },
-        testem: {
-            command: 'testem'
+        test: {
+            command: 'testem ci -P 5'
         }
     };
 };

@@ -4,7 +4,6 @@ module.exports = function(grunt) {
         all: [
             'test/**.js',
             'grunt/**.js',
-            '*.js',
             'lib/**.js'
         ],
         options: {

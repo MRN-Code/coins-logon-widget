@@ -12,8 +12,9 @@ module.exports = function(grunt) {
     require('load-grunt-tasks')(grunt);
     require('load-grunt-config')(grunt);
 
-    grunt.registerTask('lint', ['jshint', 'jscs']);
+    grunt.registerTask('lint', ['jshint']); //, 'jscs']);
     grunt.registerTask('build', ['default', 'csso', 'exec:webpack']);
     grunt.registerTask('serve', ['default', 'connect', 'watch']);
-    grunt.registerTask('default', ['lint', 'clean', 'sass', 'postcss']);
+    grunt.registerTask('test', ['exec:test']);
+    grunt.registerTask('default', ['lint', 'test', 'clean', 'sass', 'postcss']);
 };

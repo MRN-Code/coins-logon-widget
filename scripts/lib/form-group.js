@@ -35,6 +35,7 @@ FormGroup.prototype._getElements = function() {
         if (this.options.placeholder) {
             input.placeholder = this.options.placeholder;
         }
+
         if (this.options.required) {
             input.setAttribute('aria-required', true);
         }
@@ -68,6 +69,7 @@ FormGroup.prototype._setState = function(state) {
             iconElement.setAttribute('aria-hidden', true);
             element.appendChild(iconElement);
         }
+
         // Add a message if needed, otherwise remove
         if (!messageElement && this._state.message) {
             messageElement = document.createElement('span');
@@ -76,6 +78,7 @@ FormGroup.prototype._setState = function(state) {
         } else if (!this._state.message) {
             messageElement.parentNode.removeChild(messageElement);
         }
+
         if (messageElement && this._state.message) {
             messageElement.textContent = this._state.message;
         }
@@ -100,9 +103,11 @@ FormGroup.prototype._setState = function(state) {
         if (iconElement) {
             iconElement.parentNode.removeChild(iconElement);
         }
+
         if (messageElement) {
             messageElement.parentNode.removeChild(messageElement);
         }
+
         element.classList.remove(classNames.error);
         element.classList.remove(classNames.success);
     }

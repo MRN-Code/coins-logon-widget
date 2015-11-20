@@ -5,6 +5,7 @@ var Auth = require('./lib/auth');
 var Form = require('./lib/form');
 var FormGroup = require('./lib/form-group');
 var utils = require('./lib/utils');
+require('./lib/polyfills.js');
 
 var EVENTS = {
     INVALID: 'invalid',
@@ -67,6 +68,7 @@ CoinsLogonWidget.prototype._assertElement = function(element) {
         // http://stackoverflow.com/a/384380
         throw new TypeError('Expected element to be a DOM node');
     }
+
     return element;
 };
 
@@ -79,6 +81,7 @@ CoinsLogonWidget.prototype._assertString = function(str, prop) {
             str.toString()
         ].join(''));
     }
+
     return str;
 };
 
@@ -91,6 +94,7 @@ CoinsLogonWidget.prototype._getElements = function(element) {
         login: function() {
             self.emit(EVENTS.LOGIN, self.form.getFormData());
         },
+
         logout: function() {
             self.emit(EVENTS.LOGOUT);
         }
@@ -258,6 +262,7 @@ CoinsLogonWidget.prototype.onSubmit = function(event) {
 
     if (!errors) {
         this.emit('submitted', event);
+
         //TODO: Make authentication pluggable
         this.login();
     }
@@ -284,6 +289,7 @@ CoinsLogonWidget.DEFAULTS = {
         accountWillExpire: function(offset) {
             return 'Your account will expire in ' + offset + '.';
         },
+
         passwordExpired: 'Your password has expired.',
         passwordWillExpire: function(offset) {
             return 'Your password will expire in ' + offset + '.';
