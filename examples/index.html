@@ -55,7 +55,7 @@
             .example-form > * {
                 max-width: 300px;
             }
-            .example-code textarea {
+            .example-code pre {
                 background: #fff;
                 box-sizing: border-box;
                 border: thin solid #dadada;
@@ -70,6 +70,7 @@
                 resize: vertical;
                 padding: .75em;
                 outline: none;
+                overflow-x: auto;
                 width: 100%;
             }
             .example-code textarea:focus {
@@ -95,10 +96,10 @@
                 }
                 .example-form {
                     margin-bottom: 0;
-                    width: 60%;
+                    width: 55%;
                 }
                 .example-code {
-                    width: 40%;
+                    width: 45%;
                 }
                 .example-code textarea {
                     font-size: 80%;
@@ -121,16 +122,21 @@
                 <script>
                     (function() {
                         'use strict';
-                        var myWidget = new CoinsLogonWidget(
-                            document.getElementById('regular-form')
-                        );
+                        var myWidget = new CoinsLogonWidget({
+                            el: document.getElementById('regular-form'),
+                            baseUrl: 'coins-api-root',
+                            authCookieName: 'coins-cookie-nom-noms',
+                        });
                     })();
                 </script>
             </div>
             <div class="example-code">
-                <textarea>var myWidget = new CoinsLogonWidget(
-    document.querySelector('regular-form')
-);</textarea>
+                <pre>
+var myWidget = new CoinsLogonWidget({
+    el: document.getElementById('regular-form'),
+    baseUrl: 'coins-api-root',
+    authCookieName: 'coins-cookie-nom-noms',
+})</pre>
             </div>
         </div><!-- .example -->
 
@@ -141,22 +147,23 @@
                 <script>
                     (function() {
                         'use strict';
-                        var myWidget = new CoinsLogonWidget(
-                            document.getElementById('hidden-labels-form'),
-                            {
-                                hiddenLabels: true
-                            }
-                        );
+                        var myWidget = new CoinsLogonWidget({
+                            el: document.getElementById('hidden-labels-form'),
+                            hiddenLabels: true,
+                            baseUrl: 'coins-api-root',
+                            authCookieName: 'coins-cookie-nom-noms',
+                        });
                     })();
                 </script>
             </div>
             <div class="example-code">
-                <textarea>var myWidget = new CoinsLogonWidget(
-    document.getElementById('hidden-labels-form'),
-    {
-        hiddenLabels: true
-    }
-);</textarea>
+                <pre>
+var myWidget = new CoinsLogonWidget({
+    el: document.getElementById('hidden-labels-form'),
+    hiddenLabels: true
+    baseUrl: 'coins-api-root',
+    authCookieName: 'coins-cookie-nom-noms',
+});</pre>
             </div>
         </div><!-- .example -->
 
@@ -167,22 +174,23 @@
                 <script>
                     (function() {
                         'use strict';
-                        var myWidget = new CoinsLogonWidget(
-                            document.getElementById('horizontal-form'),
-                            {
-                                horizontal: true
-                            }
-                        );
+                        var myWidget = new CoinsLogonWidget({
+                            el: document.getElementById('horizontal-form'),
+                            horizontal: true,
+                            baseUrl: 'coins-api-root',
+                            authCookieName: 'coins-cookie-nom-noms',
+                        });
                     })();
                 </script>
             </div>
             <div class="example-code">
-                <textarea>var myWidget = new CoinsLogonWidget(
-    document.getElementById('horizontal-form'),
-    {
-        horizontal: true
-    }
-);</textarea>
+                <pre>
+var myWidget = new CoinsLogonWidget({
+    el: document.getElementById('horizontal-form'),
+    horizontal: true,
+    baseUrl: 'coins-api-root',
+    authCookieName: 'coins-cookie-nom-noms',
+});</pre>
             </div>
         </div><!-- .example -->
 
@@ -265,6 +273,5 @@
                 </form>
             </div>
         </div><!-- .login-form -->
-
     </body>
 </html>
