@@ -50,8 +50,9 @@
     "coins"
   ],
   "scripts": {
-    "lint": "jshint .",
-    "validate": "npm ls"
+    "lint": "grunt lint",
+    "validate": "npm ls",
+    "test": "grunt test"
   },
   "pre-commit": [
     "lint",
