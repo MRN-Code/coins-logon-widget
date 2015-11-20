@@ -71,7 +71,7 @@ function removeAuthCookie() {
     var cookieValue = 'REMOVED';
     var domain = '.mrn.org';
     var path = '/';
-    var name = 'CAS_Auth_User';
+    var name = getOptions().authCookieName;
     document.cookie = [
         name,
         '=',
