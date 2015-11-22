@@ -137,3 +137,6 @@ This project relies on Grunt to run tasks. (See its [getting started guide](http
 * **`grunt serve`:** Spin up a [connect](https://www.npmjs.com/package/connect) server and rebuild the styles and scripts when they change. Useful for development on the project.
 * **`grunt test`:** Initializes a mock api server, and fires off in-browser testing in
 multiple browsers in parallel.
+
+## Changelog
+- 2.0.0 single arg config, mandatory `baseUrl` and `authCookieName`
