@@ -5,7 +5,7 @@ module.exports = function(grunt) {
             command: 'webpack'
         },
         test: {
-            command: 'testem ci -P 5'
+            command: 'node ./launch-tests.js'
         }
     };
 };

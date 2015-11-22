@@ -5,8 +5,10 @@ _Injectable utility to manage browser authorization with COINS._
 ## Use
 
 ```js
-var widget = new CoinsLogonWidget(document.getElementById('logon-area'), {
-    baseUrl: 'http://localhost:9000/api/v1'
+var widget = new CoinsLogonWidget({
+    el: document.getElementById('logon-area'),
+    baseUrl: 'http://localhost:9000/api/v1',
+    authCookieName: 'COINS_Auth_User-production'
 });
 ```
 
@@ -133,3 +135,5 @@ This project relies on Grunt to run tasks. (See its [getting started guide](http
 * **`grunt`:** Build the project’s _un-minified_ styles and scripts
 * **`grunt build`:** Build the project’s _minified_ styles and scripts, suitable for production.
 * **`grunt serve`:** Spin up a [connect](https://www.npmjs.com/package/connect) server and rebuild the styles and scripts when they change. Useful for development on the project.
+* **`grunt test`:** Initializes a mock api server, and fires off in-browser testing in
+multiple browsers in parallel.
