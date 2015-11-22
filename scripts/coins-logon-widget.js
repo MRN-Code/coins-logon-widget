@@ -141,7 +141,7 @@ CoinsLogonWidget.prototype.login = function(formData) {
 
     this.form.setLoading();
 
-    Auth.login(formData.username, formData.password)
+    return Auth.login(formData.username, formData.password)
         .done(function(response) {
             /**
              * Successful authentication also contains information regarding
