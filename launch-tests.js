@@ -40,7 +40,7 @@ server.on('message', function handleMsg(msg) {
         console.log('server up! booting testem...');
         return spawnTestem();
     }
-    throw new ReferenceError('unhandles msg: ' + JSON.stringify(msg));
+    throw new ReferenceError('unhandled msg: ' + JSON.stringify(msg));
 });
 
 // assert child processes exit when this process exits
