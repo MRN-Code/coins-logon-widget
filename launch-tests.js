@@ -25,7 +25,10 @@ var testemExit = function(code) {
     return closeChild(code);
 };
 var spawnTestem = function() {
-    testem = cp.spawn('testem', ['ci', '-p', '7575', '-P', '5'], { stdio: 'inherit' });
+    testem = cp.spawn(
+        'node_modules/.bin/testem', ['ci', '-p', '7575', '-P', '5'],
+        { stdio: 'inherit' }
+    );
     testem.on('error', errorDie);
     testem.on('exit', testemExit);
     console.log('Spawned testem, pid: ' + testem.pid);
