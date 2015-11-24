@@ -5,6 +5,7 @@ var Auth = require('./lib/auth');
 var Form = require('./lib/form');
 var FormGroup = require('./lib/form-group');
 var utils = require('./lib/utils');
+require('./lib/polyfills.js');
 
 var EVENTS = {
     INVALID: 'invalid',
@@ -22,8 +23,11 @@ var EVENTS = {
 
 var day = 24 * 60 * 60 * 1000;
 
-function CoinsLogonWidget(element, options) {
+function CoinsLogonWidget(options) {
     EventEmitter.call(this);
+    var element = this._assertElement(options.el);
+    var baseUrl = this._assertString(options.baseUrl, 'baseUrl');
+    var authCookieName = this._assertString(options.authCookieName, 'authCookieName');
 
     this.options = assign({}, CoinsLogonWidget.DEFAULTS, options);
 
@@ -56,15 +60,32 @@ function CoinsLogonWidget(element, options) {
 CoinsLogonWidget.prototype = Object.create(EventEmitter.prototype);
 CoinsLogonWidget.prototype.constructor = CoinsLogonWidget;
 
-CoinsLogonWidget.prototype._getElements = function(element) {
+CoinsLogonWidget.prototype._assertElement = function(element) {
     if (!element) {
-        throw new Error('Element required');
+        throw new TypeError('Element required');
     } else if (!(element instanceof Node)) {
         // Make sure `element` is an actual node
         // http://stackoverflow.com/a/384380
-        throw new Error('Expected element to be a DOM node');
+        throw new TypeError('Expected element to be a DOM node');
     }
 
+    return element;
+};
+
+CoinsLogonWidget.prototype._assertString = function(str, prop) {
+    if (!str || typeof str !== 'string') {
+        throw new TypeError([
+            'expected string',
+            prop ? ' (' + prop + ')' : '',
+            ', received: ',
+            str.toString()
+        ].join(''));
+    }
+
+    return str;
+};
+
+CoinsLogonWidget.prototype._getElements = function(element) {
     var self = this;
 
     this.form = new Form({
@@ -73,6 +94,7 @@ CoinsLogonWidget.prototype._getElements = function(element) {
         login: function() {
             self.emit(EVENTS.LOGIN, self.form.getFormData());
         },
+
         logout: function() {
             self.emit(EVENTS.LOGOUT);
         }
@@ -119,7 +141,7 @@ CoinsLogonWidget.prototype.login = function(formData) {
 
     this.form.setLoading();
 
-    Auth.login(formData.username, formData.password)
+    return Auth.login(formData.username, formData.password)
         .done(function(response) {
             /**
              * Successful authentication also contains information regarding
@@ -240,6 +262,7 @@ CoinsLogonWidget.prototype.onSubmit = function(event) {
 
     if (!errors) {
         this.emit('submitted', event);
+
         //TODO: Make authentication pluggable
         this.login();
     }
@@ -266,6 +289,7 @@ CoinsLogonWidget.DEFAULTS = {
         accountWillExpire: function(offset) {
             return 'Your account will expire in ' + offset + '.';
         },
+
         passwordExpired: 'Your password has expired.',
         passwordWillExpire: function(offset) {
             return 'Your password will expire in ' + offset + '.';

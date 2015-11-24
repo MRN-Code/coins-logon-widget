@@ -43,7 +43,7 @@ Form.prototype._getIndicatorElements = function() {
     var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     var title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
     var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    var circleAttributes= {
+    var circleAttributes = {
         cx: 20,
         cy: 20,
         r: 8,
@@ -103,6 +103,7 @@ Form.prototype._setState = function(state) {
 
         notification.classList.remove(this.options.classNames.notificationError);
         notification.classList.remove(this.options.classNames.notificationSuccess);
+
         // TODO: Error and success are applied to the notification. This may not
         // make the most sense.
         if (state.error) {
@@ -131,10 +132,11 @@ Form.prototype._setState = function(state) {
                     return formGroup.element;
                 })
                 .reverse()
-                .forEach(function(formGroupElement){
+                .forEach(function(formGroupElement) {
                     self.element.insertBefore(formGroupElement, indicator);
                 });
         }
+
         if (status) {
             this.element.removeChild(status);
         }
@@ -265,6 +267,7 @@ Form.prototype.validate = function() {
         validations = this.formGroups.map(function(formGroup) {
             return formGroup.validate();
         });
+
         isValid = validations.every(function(validation) {
             return validation === true;
         });

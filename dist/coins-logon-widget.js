@@ -61,6 +61,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Form = __webpack_require__(5);
 	var FormGroup = __webpack_require__(6);
 	var utils = __webpack_require__(7);
+	__webpack_require__(9);
 
 	var EVENTS = {
 	    INVALID: 'invalid',
@@ -78,8 +79,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var day = 24 * 60 * 60 * 1000;
 
-	function CoinsLogonWidget(element, options) {
+	function CoinsLogonWidget(options) {
 	    EventEmitter.call(this);
+	    var element = this._assertElement(options.el);
+	    var baseUrl = this._assertString(options.baseUrl, 'baseUrl');
+	    var authCookieName = this._assertString(options.authCookieName, 'authCookieName');
 
 	    this.options = assign({}, CoinsLogonWidget.DEFAULTS, options);
 
@@ -112,15 +116,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	CoinsLogonWidget.prototype = Object.create(EventEmitter.prototype);
 	CoinsLogonWidget.prototype.constructor = CoinsLogonWidget;
 
-	CoinsLogonWidget.prototype._getElements = function(element) {
+	CoinsLogonWidget.prototype._assertElement = function(element) {
 	    if (!element) {
-	        throw new Error('Element required');
+	        throw new TypeError('Element required');
 	    } else if (!(element instanceof Node)) {
 	        // Make sure `element` is an actual node
 	        // http://stackoverflow.com/a/384380
-	        throw new Error('Expected element to be a DOM node');
+	        throw new TypeError('Expected element to be a DOM node');
 	    }
 
+	    return element;
+	};
+
+	CoinsLogonWidget.prototype._assertString = function(str, prop) {
+	    if (!str || typeof str !== 'string') {
+	        throw new TypeError([
+	            'expected string',
+	            prop ? ' (' + prop + ')' : '',
+	            ', received: ',
+	            str.toString()
+	        ].join(''));
+	    }
+
+	    return str;
+	};
+
+	CoinsLogonWidget.prototype._getElements = function(element) {
 	    var self = this;
 
 	    this.form = new Form({
@@ -129,6 +150,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        login: function() {
 	            self.emit(EVENTS.LOGIN, self.form.getFormData());
 	        },
+
 	        logout: function() {
 	            self.emit(EVENTS.LOGOUT);
 	        }
@@ -175,7 +197,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    this.form.setLoading();
 
-	    Auth.login(formData.username, formData.password)
+	    return Auth.login(formData.username, formData.password)
 	        .done(function(response) {
 	            /**
 	             * Successful authentication also contains information regarding
@@ -296,6 +318,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    if (!errors) {
 	        this.emit('submitted', event);
+
 	        //TODO: Make authentication pluggable
 	        this.login();
 	    }
@@ -322,6 +345,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        accountWillExpire: function(offset) {
 	            return 'Your account will expire in ' + offset + '.';
 	        },
+
 	        passwordExpired: 'Your password has expired.',
 	        passwordWillExpire: function(offset) {
 	            return 'Your password will expire in ' + offset + '.';
@@ -872,7 +896,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var assign = __webpack_require__(2).assign;
 	var hawk = __webpack_require__(4);
 
-
 	/** Authentication credentials key for localStorage. */
 	var AUTH_CREDENTIALS_KEY = 'COINS_AUTH_CREDENTIALS';
 
@@ -941,7 +964,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var cookieValue = 'REMOVED';
 	    var domain = '.mrn.org';
 	    var path = '/';
-	    var name = 'CAS_Auth_User';
+	    var name = getOptions().authCookieName;
 	    document.cookie = [
 	        name,
 	        '=',
@@ -997,6 +1020,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        message = (JSON.parse(error.responseText) || {});
 	        message = (message.error || {}).message || '';
 	    }
+
 	    return message || statusText || 'Unknown error';
 	}
 
@@ -1030,6 +1054,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        .fail(function(error) {
 	            deferred.reject(mapApiError(error));
 	        });
+
 	    return deferred.promise();
 	}
 
@@ -1773,7 +1798,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 	    var title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
 	    var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-	    var circleAttributes= {
+	    var circleAttributes = {
 	        cx: 20,
 	        cy: 20,
 	        r: 8,
@@ -1833,6 +1858,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        notification.classList.remove(this.options.classNames.notificationError);
 	        notification.classList.remove(this.options.classNames.notificationSuccess);
+
 	        // TODO: Error and success are applied to the notification. This may not
 	        // make the most sense.
 	        if (state.error) {
@@ -1861,10 +1887,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    return formGroup.element;
 	                })
 	                .reverse()
-	                .forEach(function(formGroupElement){
+	                .forEach(function(formGroupElement) {
 	                    self.element.insertBefore(formGroupElement, indicator);
 	                });
 	        }
+
 	        if (status) {
 	            this.element.removeChild(status);
 	        }
@@ -1995,6 +2022,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        validations = this.formGroups.map(function(formGroup) {
 	            return formGroup.validate();
 	        });
+
 	        isValid = validations.every(function(validation) {
 	            return validation === true;
 	        });
@@ -2073,6 +2101,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (this.options.placeholder) {
 	            input.placeholder = this.options.placeholder;
 	        }
+
 	        if (this.options.required) {
 	            input.setAttribute('aria-required', true);
 	        }
@@ -2106,6 +2135,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            iconElement.setAttribute('aria-hidden', true);
 	            element.appendChild(iconElement);
 	        }
+
 	        // Add a message if needed, otherwise remove
 	        if (!messageElement && this._state.message) {
 	            messageElement = document.createElement('span');
@@ -2114,6 +2144,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        } else if (!this._state.message) {
 	            messageElement.parentNode.removeChild(messageElement);
 	        }
+
 	        if (messageElement && this._state.message) {
 	            messageElement.textContent = this._state.message;
 	        }
@@ -2138,9 +2169,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (iconElement) {
 	            iconElement.parentNode.removeChild(iconElement);
 	        }
+
 	        if (messageElement) {
 	            messageElement.parentNode.removeChild(messageElement);
 	        }
+
 	        element.classList.remove(classNames.error);
 	        element.classList.remove(classNames.success);
 	    }
@@ -2234,6 +2267,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (maybeCallable instanceof Function) {
 	        return maybeCallable.apply(null, args);
 	    }
+
 	    return maybeCallable;
 	}
 
@@ -2280,6 +2314,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (typeof string !== 'string') {
 	        string = '';
 	    }
+
 	    return string + uniqueNumber.generate();
 	}
 
@@ -2362,6 +2397,71 @@ return /******/ (function(modules) { // webpackBootstrap
 			window.UniqueNumber = UniqueNumber;
 		}
 	})();
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = (function() {
+	    if (!Function.prototype.bind) {
+	        Function.prototype.bind = __webpack_require__(10);
+	    }
+	})();
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	var ERROR_MESSAGE = 'Function.prototype.bind called on incompatible ';
+	var slice = Array.prototype.slice;
+	var toStr = Object.prototype.toString;
+	var funcType = '[object Function]';
+
+	module.exports = function bind(that) {
+	    var target = this;
+	    if (typeof target !== 'function' || toStr.call(target) !== funcType) {
+	        throw new TypeError(ERROR_MESSAGE + target);
+	    }
+	    var args = slice.call(arguments, 1);
+
+	    var binder = function () {
+	        if (this instanceof bound) {
+	            var result = target.apply(
+	                this,
+	                args.concat(slice.call(arguments))
+	            );
+	            if (Object(result) === result) {
+	                return result;
+	            }
+	            return this;
+	        } else {
+	            return target.apply(
+	                that,
+	                args.concat(slice.call(arguments))
+	            );
+	        }
+	    };
+
+	    var boundLength = Math.max(0, target.length - args.length);
+	    var boundArgs = [];
+	    for (var i = 0; i < boundLength; i++) {
+	        boundArgs.push('$' + i);
+	    }
+
+	    var bound = Function('binder', 'return function (' + boundArgs.join(',') + '){ return binder.apply(this,arguments); }')(binder);
+
+	    if (target.prototype) {
+	        var Empty = function Empty() {};
+	        Empty.prototype = target.prototype;
+	        bound.prototype = new Empty();
+	        Empty.prototype = null;
+	    }
+
+	    return bound;
+	};
+
 
 
 /***/ }

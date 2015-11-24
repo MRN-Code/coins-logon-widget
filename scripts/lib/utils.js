@@ -17,6 +17,7 @@ function callOrReturn(maybeCallable, args) {
     if (maybeCallable instanceof Function) {
         return maybeCallable.apply(null, args);
     }
+
     return maybeCallable;
 }
 
@@ -63,6 +64,7 @@ function uniqueId(string) {
     if (typeof string !== 'string') {
         string = '';
     }
+
     return string + uniqueNumber.generate();
 }
 

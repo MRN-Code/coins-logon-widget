@@ -2,7 +2,9 @@
 module.exports = function(grunt) {
     return {
         options: {
-            map: true, // Inline sourcemap
+            map: true,
+
+            // Inline sourcemap
             processors: [
                 require('autoprefixer')({ browsers: 'last 3 versions' })
             ]
