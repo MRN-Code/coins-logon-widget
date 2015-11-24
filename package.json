@@ -55,11 +55,15 @@
   "scripts": {
     "lint": "grunt lint",
     "validate": "npm ls",
-    "test": "grunt test"
+    "build": "grunt build",
+    "test": "grunt test",
+    "commit-dist": "git add dist/*"
   },
   "pre-commit": [
     "lint",
     "validate",
-    "test"
+    "build",
+    "test",
+    "commit-dist"
   ]
 }
