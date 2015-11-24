@@ -22,7 +22,7 @@ test('constructor, basic', function(t) {
     });
     t.ok(myWidget, 'constructor returns a widget');
     t.equal(myWidget.element, el, 'constructor sets el');
-    t.ok(jQuery('#regular_form:visible').length, 'form visible on DOM');
+    t.ok(jQuery('#regular_form.coins-logon-widget:visible').length, 'form visible on DOM');
     t.end();
 });
 
