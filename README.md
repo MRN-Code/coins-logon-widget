@@ -1,3 +1,5 @@
+[ ![Codeship Status for MRN-Code/coins-logon-widget](https://codeship.com/projects/b88d0f90-75ca-0133-0819-2ee6f44e2e4a/status?branch=master)](https://codeship.com/projects/118019)
+
 # COINS Logon Widget
 
 _Injectable utility to manage browser authorization with COINS._
