@@ -2,6 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
+    bail: true,
     node: {
         fs: 'empty'
     },
