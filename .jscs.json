@@ -1,0 +1,7 @@
+{
+    "esnext": true,
+    "preset": "airbnb",
+    "validateIndentation": 4,
+    "safeContextKeyword": ["self"],
+    "disallowMultipleVarDecl": "exceptUndefined"
+}
