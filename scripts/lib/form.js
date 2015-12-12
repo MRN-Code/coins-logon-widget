@@ -1,5 +1,5 @@
 'use strict';
-var assign = require('es6-object-assign').assign;
+var assign = require('lodash/object/assign');
 var FormGroup = require('./form-group');
 var utils = require('./utils');
 

@@ -1,5 +1,5 @@
 'use strict';
-var assign = require('es6-object-assign').assign;
+var assign = require('lodash/object/assign');
 var hawk = require('hawk/lib/browser');
 
 /** Authentication credentials key for localStorage. */

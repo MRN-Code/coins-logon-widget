@@ -1,6 +1,6 @@
 'use strict';
 var EventEmitter = require('wolfy87-eventemitter');
-var assign = require('es6-object-assign').assign;
+var assign = require('lodash/object/assign');
 var Auth = require('./lib/auth');
 var Form = require('./lib/form');
 var FormGroup = require('./lib/form-group');

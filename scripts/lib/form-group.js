@@ -1,5 +1,5 @@
 'use strict';
-var assign = require('es6-object-assign').assign;
+var assign = require('lodash/object/assign');
 var utils = require('./utils');
 
 'use strict';
