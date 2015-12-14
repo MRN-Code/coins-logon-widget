@@ -46,6 +46,49 @@ test('constructor, hiddenLabels', function(t) {
     t.end();
 });
 
+// Test for a bug where the widget's username and password fields flip order
+// every other time the widget is displayed. The test's structure mimics COINS's
+// `clientAuthTimer` module, where the bug occurs.
+test('field order', function(t) {
+    var $target = jQuery('#field_order_form');
+    var tempId = 'field_order_form_temp';
+    var myModule = {
+        showWidget: function() {
+            $target.append('<div id="' + tempId + '"></div>');
+            myModule.logonWidget = new CoinsLogonWidget({
+                el: document.getElementById(tempId),
+                baseUrl: 'coins-api-root',
+                authCookieName: 'delicious-cookies',
+            });
+            myModule.logonWidget.removeAllListeners();
+            $target.fadeIn();
+        },
+
+        removeWidget: function() {
+            var $temp = jQuery('#' + tempId);
+            $temp.fadeOut(function() {
+                $temp.remove();
+            });
+
+            myModule.logonWidget.destroy();
+            myModule.logonWidget = null;
+        },
+    };
+
+    function getFirstInputName() {
+        return jQuery('#' + tempId + ' input').eq(0).attr('name');
+    }
+
+    myModule.showWidget();
+    t.equal(getFirstInputName(), 'username', 'Username input is first');
+
+    myModule.removeWidget();
+    myModule.showWidget();
+    t.equal(getFirstInputName(), 'username', 'User input is still first');
+
+    t.end();
+});
+
 test('api activity', {timeout: 2000}, function(t) {
     t.plan(1);
     var el = document.getElementById('api_call_form');

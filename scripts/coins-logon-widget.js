@@ -1,6 +1,7 @@
 'use strict';
 var EventEmitter = require('wolfy87-eventemitter');
-var assign = require('es6-object-assign').assign;
+var assign = require('lodash/object/assign');
+var cloneDeep = require('lodash/lang/cloneDeep');
 var Auth = require('./lib/auth');
 var Form = require('./lib/form');
 var FormGroup = require('./lib/form-group');
@@ -29,7 +30,7 @@ function CoinsLogonWidget(options) {
     var baseUrl = this._assertString(options.baseUrl, 'baseUrl');
     var authCookieName = this._assertString(options.authCookieName, 'authCookieName');
 
-    this.options = assign({}, CoinsLogonWidget.DEFAULTS, options);
+    this.options = assign(cloneDeep(CoinsLogonWidget.DEFAULTS), options);
 
     /**
      * If the form has hidden labels or a horizontal layout apply the

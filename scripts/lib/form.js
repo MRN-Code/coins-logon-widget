@@ -1,12 +1,13 @@
 'use strict';
-var assign = require('es6-object-assign').assign;
+var assign = require('lodash/object/assign');
+var cloneDeep = require('lodash/lang/cloneDeep');
 var FormGroup = require('./form-group');
 var utils = require('./utils');
 
 function Form(options) {
     options = options || {};
 
-    this.options = assign({}, Form.DEFAULTS, options);
+    this.options = assign(cloneDeep(Form.DEFAULTS), options);
     this.element = this._getElements();
     this._setState(this.options.initialState);
 }
