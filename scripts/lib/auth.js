@@ -92,7 +92,7 @@ function removeAuthCookie() {
     };
 
     if (hostPieces.length > 2) {
-        options.domain = '.' + hostPieces.slice(hostPieces.length - 2).join('.');
+        options.domain = '.' + hostPieces.slice(-2).join('.');
     } else {
         options.domain = hostPieces.join('.');
     }
