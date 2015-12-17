@@ -167,9 +167,11 @@ function login(username, password) {
 /**
  * Log out.
  *
+ * @param {function} cb Callback to fire once stored auth credentials have been
+ *                      cleared. This is primarily for testing.
  * @return {Promise}
  */
-function logout() {
+function logout(cb) {
     var deferred = jQuery.Deferred();
     var credentials = getAuthCredentials();
     var method = 'DELETE';
@@ -192,10 +194,14 @@ function logout() {
         })
         .always(function() {
             removeAuthCookie();
-            return setAuthCredentials({
+            setAuthCredentials({
                 date: Date.now(),
                 status: 'logged out',
             });
+
+            if (cb instanceof Function) {
+                cb();
+            }
         });
 
     return deferred.promise();

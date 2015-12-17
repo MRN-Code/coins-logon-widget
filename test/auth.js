@@ -53,15 +53,9 @@ test('log out', function(t) {
 
     // `Auth.logout()` returns a jQuery deferred. Cookie removal happens the
     // function's `jQuery.ajax`'s chained `.always` method, which is fired
-    // _after_ the deferred resolves. Use a timer to run the test at the
+    // _after_ the deferred resolves. Use a callback to run the test at the
     // appropriate time.
-    Auth.logout()
-        .always(function(result) {
-            // `jQuery.ajax` will fail without the server
-            t.ok(result, 'log out runs');
-        });
-
-    setTimeout(function() {
+    Auth.logout(function() {
         var authCredentials = JSON.parse(localStorage[AUTH_CREDENTIALS_KEY]);
 
         t.notOk(Cookies.get(options.authCookieName), 'auth cookie unset');
@@ -76,6 +70,10 @@ test('log out', function(t) {
         // trouble detecting this, so check manually.
         var cookies = document.cookie.split('; ');
         t.equal(cookies.indexOf('REMOVED'), -1, 'auth cookie not malformed');
-    }, 100);
+    })
+        .always(function(result) {
+            // `jQuery.ajax` will fail without the server
+            t.ok(result, 'log out runs');
+        });
 });
 
