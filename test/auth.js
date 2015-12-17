@@ -1,12 +1,12 @@
 /**
- * Unit tests for the logon widget's 'Auth' service.
+ * Unit tests for the logon widget's 'auth' service.
  *
  * @todo  Move login tests to this file.
  */
 'use strict';
 
-var Auth = require('../scripts/lib/auth');
-var Cookies = require('js-cookie');
+var auth = require('../scripts/lib/auth');
+var cookies = require('js-cookie');
 var test = require('tape');
 
 if (typeof jQuery === 'undefined') {
@@ -20,7 +20,7 @@ var options = {
 
 test('set options', function(t) {
     try {
-        t.ok(Auth.setOptions(options), 'set Auth options');
+        t.ok(auth.setOptions(options), 'set auth options');
         t.end();
     } catch (error) {
         t.end(error);
@@ -28,7 +28,7 @@ test('set options', function(t) {
 });
 
 test('get options', function(t) {
-    t.deepEqual(Auth.getOptions(), options, 'get the set Auth options');
+    t.deepEqual(auth.getOptions(), options, 'get the set auth options');
     t.end();
 });
 
@@ -38,7 +38,7 @@ test('log out', function(t) {
     var AUTH_CREDENTIALS_KEY = 'COINS_AUTH_CREDENTIALS';
 
     // Set an 'authorized' cookie
-    Cookies.set(options.authCookieName, 'some_test_value', {
+    cookies.set(options.authCookieName, 'some_test_value', {
         expires: 7 * 24 * 60 * 60,
     });
 
@@ -51,14 +51,14 @@ test('log out', function(t) {
         expireTime: 1450312405062,
     });
 
-    // `Auth.logout()` returns a jQuery deferred. Cookie removal happens the
+    // `auth.logout()` returns a jQuery deferred. Cookie removal happens the
     // function's `jQuery.ajax`'s chained `.always` method, which is fired
     // _after_ the deferred resolves. Use a callback to run the test at the
     // appropriate time.
-    Auth.logout(function() {
+    auth.logout(function() {
         var authCredentials = JSON.parse(localStorage[AUTH_CREDENTIALS_KEY]);
 
-        t.notOk(Cookies.get(options.authCookieName), 'auth cookie unset');
+        t.notOk(cookies.get(options.authCookieName), 'auth cookie unset');
         t.ok(
             !('id' in authCredentials) &&
             !('key' in authCredentials),
@@ -68,8 +68,11 @@ test('log out', function(t) {
         // Test for a bug where the auth cookie on the `.mrn.org` domain is set
         // with the value 'REMOVED' and the name is cleared. js-cookie has
         // trouble detecting this, so check manually.
-        var cookies = document.cookie.split('; ');
-        t.equal(cookies.indexOf('REMOVED'), -1, 'auth cookie not malformed');
+        t.equal(
+            document.cookie.split('; ').indexOf('REMOVED'),
+            -1,
+            'auth cookie not malformed'
+        );
     })
         .always(function(result) {
             // `jQuery.ajax` will fail without the server

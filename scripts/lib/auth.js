@@ -1,6 +1,6 @@
 'use strict';
 var assign = require('lodash/object/assign');
-var Cookies = require('js-cookie');
+var cookies = require('js-cookie');
 var hawk = require('hawk/lib/browser');
 
 /** Authentication credentials key for localStorage. */
@@ -98,17 +98,17 @@ function removeAuthCookie() {
     }
 
     if (options) {
-        Cookies.remove(authCookieName, options);
+        cookies.remove(authCookieName, options);
 
         /**
          * Try again, because sometimes the `options` are bad and don't result
          * in a reset cookie.
          *
-         * @todo  Figure out how to use only one `Cookies` call.
+         * @todo  Figure out how to use only one `cookies` call.
          */
-        Cookies.remove(authCookieName);
+        cookies.remove(authCookieName);
     } else {
-        Cookies.remove(authCookieName);
+        cookies.remove(authCookieName);
     }
 }
 
