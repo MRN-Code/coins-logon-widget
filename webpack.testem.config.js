@@ -7,7 +7,7 @@ module.exports = {
         fs: 'empty'
     },
     entry: {
-        'test': './test/index.js'
+        'test': ['./test/index.js', './test/auth.js']
     },
     output: {
         path: path.join(__dirname),

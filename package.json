@@ -43,6 +43,7 @@
   "dependencies": {
     "function-bind": "^1.0.2",
     "hawk": "^3.1.0",
+    "js-cookie": "^2.0.4",
     "lodash": "^3.10.1",
     "unique-number": "^2.0.1",
     "wolfy87-eventemitter": "^4.2.11"
