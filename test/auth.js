@@ -51,32 +51,29 @@ test('log out', function(t) {
         expireTime: 1450312405062,
     });
 
-    // `auth.logout()` returns a jQuery deferred. Cookie removal happens the
-    // function's `jQuery.ajax`'s chained `.always` method, which is fired
-    // _after_ the deferred resolves. Use a callback to run the test at the
-    // appropriate time.
-    auth.logout(function() {
-        var authCredentials = JSON.parse(localStorage[AUTH_CREDENTIALS_KEY]);
-
-        t.notOk(cookies.get(options.authCookieName), 'auth cookie unset');
-        t.ok(
-            !('id' in authCredentials) &&
-            !('key' in authCredentials),
-            'stored credentials unset'
-        );
-
-        // Test for a bug where the auth cookie on the `.mrn.org` domain is set
-        // with the value 'REMOVED' and the name is cleared. js-cookie has
-        // trouble detecting this, so check manually.
-        t.equal(
-            document.cookie.split('; ').indexOf('REMOVED'),
-            -1,
-            'auth cookie not malformed'
-        );
-    })
+    auth.logout()
         .always(function(result) {
-            // `jQuery.ajax` will fail without the server
+            // `jQuery.ajax` will fail without the server. Running in a
+            // deferred's `always` ensures this code runs.
+            var authCredentials = JSON.parse(localStorage[AUTH_CREDENTIALS_KEY]);
+
             t.ok(result, 'log out runs');
+
+            t.notOk(cookies.get(options.authCookieName), 'auth cookie unset');
+            t.ok(
+                !('id' in authCredentials) &&
+                !('key' in authCredentials),
+                'stored credentials unset'
+            );
+
+            // Test for a bug where the auth cookie on the `.mrn.org` domain is set
+            // with the value 'REMOVED' and the name is cleared. js-cookie has
+            // trouble detecting this, so check manually.
+            t.equal(
+                document.cookie.split('; ').indexOf('REMOVED'),
+                -1,
+                'auth cookie not malformed'
+            );
         });
 });
 

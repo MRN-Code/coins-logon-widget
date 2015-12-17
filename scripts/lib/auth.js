@@ -78,13 +78,16 @@ function getApiUrl(endpoint) {
 }
 
 /**
- * Remove the authentication cookie
+ * Remove authentication.
+ *
+ * Clear the authentication cookie and credentials stored in localStorage. Acts
+ * as an identity function for use with API calls.
  *
  * @{@link  https://github.com/js-cookie/js-cookie}
  *
- * @return {undefined}
+ * @return {*} Same argument(s) passed in (identity)
  */
-function removeAuthCookie() {
+function removeAuth() {
     var authCookieName = getOptions().authCookieName;
     var hostPieces = location.hostname.split('.');
     var options = {
@@ -97,6 +100,7 @@ function removeAuthCookie() {
         options.domain = hostPieces.join('.');
     }
 
+    /** Clear auth cookie */
     if (options) {
         cookies.remove(authCookieName, options);
 
@@ -110,6 +114,14 @@ function removeAuthCookie() {
     } else {
         cookies.remove(authCookieName);
     }
+
+    /** Remove stored credentials */
+    setAuthCredentials({
+        date: Date.now(),
+        status: 'logged out',
+    });
+
+    return [].slice.call(arguments);
 }
 
 /**
@@ -196,17 +208,14 @@ function login(username, password) {
 /**
  * Log out.
  *
- * @param {function} cb Callback to fire once stored auth credentials have been
- *                      cleared. This is primarily for testing.
- * @return {Promise}
+ * @return {jQuery.Deferred} Filtered response of `jQuery.ajax` call.
  */
-function logout(cb) {
-    var deferred = jQuery.Deferred();
+function logout() {
     var credentials = getAuthCredentials();
     var method = 'DELETE';
     var url = getApiUrl('/auth/keys/' + credentials.id);
 
-    jQuery.ajax({
+    return jQuery.ajax({
         dataType: 'json',
         headers: getHawkHeaders(url, method, credentials),
         type: method,
@@ -215,25 +224,8 @@ function logout(cb) {
             withCredentials: true
         },
     })
-        .done(function(response) {
-            deferred.resolve(mapApiSuccess(response));
-        })
-        .fail(function(error) {
-            deferred.reject(mapApiError(error));
-        })
-        .always(function() {
-            removeAuthCookie();
-            setAuthCredentials({
-                date: Date.now(),
-                status: 'logged out',
-            });
-
-            if (cb instanceof Function) {
-                cb();
-            }
-        });
-
-    return deferred.promise();
+        .then(mapApiSuccess, mapApiError)
+        .then(removeAuth, removeAuth);
 }
 
 /**
