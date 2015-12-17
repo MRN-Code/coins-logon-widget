@@ -46,11 +46,10 @@ function CoinsLogonWidget(options) {
     }
 
     // Configure auth
-    if (this.options.baseUrl) {
-        Auth.setOptions({
-            baseUrl: this.options.baseUrl
-        });
-    }
+    Auth.setOptions({
+        authCookieName: authCookieName,
+        baseUrl: baseUrl,
+    });
 
     this.element = this._getElements(element);
     this._setState();

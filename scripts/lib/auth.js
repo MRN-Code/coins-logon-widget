@@ -1,5 +1,6 @@
 'use strict';
 var assign = require('lodash/object/assign');
+var Cookies = require('js-cookie');
 var hawk = require('hawk/lib/browser');
 
 /** Authentication credentials key for localStorage. */
@@ -7,8 +8,23 @@ var AUTH_CREDENTIALS_KEY = 'COINS_AUTH_CREDENTIALS';
 
 /** Local holder for options. */
 var options = {
-    baseUrl: ''
+    authCookieName: '',
+    baseUrl: '',
 };
+
+/**
+ * Clear malformed cookies.
+ *
+ * This addresses a bug introduced in the logon widget where `Auth.logout()`
+ * cleared the auth cookie's name and set its value to 'REMOVED'. This malformed
+ * cookie caused the API server to error.
+ *
+ * @todo  Remove from widget code after release of v0.38.0 into production.
+ */
+if (document.cookie.split('; ').indexOf('REMOVED') !== -1) {
+    document.cookie = '=REMOVED;path=/;domain=.mrn.org;' +
+        'expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
 
 /**
  * Get saved authentication credentials.
@@ -64,23 +80,36 @@ function getApiUrl(endpoint) {
 /**
  * Remove the authentication cookie
  *
+ * @{@link  https://github.com/js-cookie/js-cookie}
+ *
  * @return {undefined}
  */
 function removeAuthCookie() {
-    var cookieValue = 'REMOVED';
-    var domain = '.mrn.org';
-    var path = '/';
-    var name = getOptions().authCookieName;
-    document.cookie = [
-        name,
-        '=',
-        cookieValue,
-        '; Path=',
-        path,
-        '; Domain=',
-        domain,
-        ';'
-    ].join('');
+    var authCookieName = getOptions().authCookieName;
+    var hostPieces = location.hostname.split('.');
+    var options = {
+        path: '/'
+    };
+
+    if (hostPieces.length > 2) {
+        options.domain = '.' + hostPieces.slice(hostPieces.length - 2).join('.');
+    } else {
+        options.domain = hostPieces.join('.');
+    }
+
+    if (options) {
+        Cookies.remove(authCookieName, options);
+
+        /**
+         * Try again, because sometimes the `options` are bad and don't result
+         * in a reset cookie.
+         *
+         * @todo  Figure out how to use only one `Cookies` call.
+         */
+        Cookies.remove(authCookieName);
+    } else {
+        Cookies.remove(authCookieName);
+    }
 }
 
 /**
