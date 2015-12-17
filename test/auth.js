@@ -5,7 +5,7 @@
  */
 'use strict';
 
-var Auth = require('../scripts/lib/Auth');
+var Auth = require('../scripts/lib/auth');
 var Cookies = require('js-cookie');
 var test = require('tape');
 
