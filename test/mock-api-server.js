@@ -28,6 +28,19 @@ router.post('/auth/keys', function(req, res) {
     }));
 });
 
+router.get('/auth/cookies/:id', function(req, res) {
+    if ('id' in req.params && req.params.id.length > 0) {
+        res.writeHead(200);
+        res.end(JSON.stringify({
+            data: [req.params.id],
+            error: null,
+        }));
+    } else {
+        res.writeHead(400);
+        res.end();
+    }
+});
+
 server = http.createServer(function(req, res) {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:7575');
     res.setHeader('Access-Control-Request-Method', 'http://localhost:7575');

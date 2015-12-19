@@ -15,7 +15,15 @@ if (typeof jQuery === 'undefined') {
 
 var options = {
     authCookieName: 'Test_Auth_Cookie_Name',
-    baseUrl: 'http://localhost:1337',
+    baseUrl: 'http://localhost:12354',
+};
+var AUTH_CREDENTIALS_KEY = 'COINS_AUTH_CREDENTIALS';
+var authCredentials = {
+    id: '772d580c-377c-43e1-9f05-cac909347fb5',
+    key: 'f14c5870-0b77-4abf-9adb-9d718a30f04d',
+    algorithm: 'sha256',
+    issueTime: 1450310605062,
+    expireTime: 1450312405062,
 };
 
 test('set options', function(t) {
@@ -35,21 +43,13 @@ test('get options', function(t) {
 test('log out', function(t) {
     t.plan(4);
 
-    var AUTH_CREDENTIALS_KEY = 'COINS_AUTH_CREDENTIALS';
-
     // Set an 'authorized' cookie
     cookies.set(options.authCookieName, 'some_test_value', {
         expires: 7 * 24 * 60 * 60,
     });
 
     // Fake stored `localStorage` credentials
-    localStorage[AUTH_CREDENTIALS_KEY] = JSON.stringify({
-        id: '772d580c-377c-43e1-9f05-cac909347fb5',
-        key: 'f14c5870-0b77-4abf-9adb-9d718a30f04d',
-        algorithm: 'sha256',
-        issueTime: 1450310605062,
-        expireTime: 1450312405062,
-    });
+    localStorage[AUTH_CREDENTIALS_KEY] = JSON.stringify(authCredentials);
 
     auth.logout()
         .always(function(result) {
@@ -75,5 +75,30 @@ test('log out', function(t) {
                 'auth cookie not malformed'
             );
         });
+});
+
+test('logged in check', function(t) {
+    t.plan(3);
+
+    //TODO: Move this teardown to a common function?
+    cookies.remove(options.authCookieName);
+    localStorage[AUTH_CREDENTIALS_KEY] = JSON.stringify({});
+
+    auth.isLoggedIn().always(function(response) {
+        t.notOk(response, 'not initially logged in');
+    });
+
+    cookies.set(options.authCookieName, 'some_test_value');
+
+    auth.isLoggedIn().always(function(response) {
+        t.notOk(response, 'requires auth credentials');
+    });
+
+    localStorage[AUTH_CREDENTIALS_KEY] = JSON.stringify(authCredentials);
+
+    auth.isLoggedIn()
+        .then(function(response) {
+            t.ok(response, 'shows logged in');
+        }, t.end);
 });
 
