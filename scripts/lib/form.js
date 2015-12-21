@@ -202,7 +202,11 @@ Form.prototype.clearMessage = function() {
 
 Form.prototype.destroy = function() {
     this.element.removeEventListener('submit', this._submitHandler, false);
-    this._removeFormGroups();
+
+    if (this.formGroups) {
+        this._removeFormGroups();
+    }
+
     utils.removeElement(this.element);
 
     delete this._state;
