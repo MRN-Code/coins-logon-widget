@@ -108,6 +108,8 @@ CoinsLogonWidget.prototype._getElements = function(element) {
 };
 
 CoinsLogonWidget.prototype._setState = function() {
+    var self = this;
+
     this.on(EVENTS.LOGIN, this.login);
     this.on(EVENTS.LOGIN_ERROR, this.onError);
     this.on(EVENTS.LOGIN_ACCOUNT_EXPIRED, this.onAccountExpired);
@@ -118,6 +120,14 @@ CoinsLogonWidget.prototype._setState = function() {
     this.on(EVENTS.LOGOUT, this.logout);
     this.on(EVENTS.LOGOUT_ERROR, this.onError);
     this.on(EVENTS.LOGOUT_SUCCESS, this.onLogout);
+
+    auth.isLoggedIn().then(function(isLoggedIn) {
+        if (isLoggedIn) {
+            self.emit(EVENTS.LOGIN_SUCCESS, {
+                username: auth.getUsername(),
+            });
+        }
+    });
 };
 
 CoinsLogonWidget.prototype.destroy = function() {

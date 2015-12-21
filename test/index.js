@@ -1,5 +1,6 @@
 var test = require('tape');
 var CoinsLogonWidget = require('../scripts/coins-logon-widget.js');
+var cookies = require('js-cookie');
 var html = require('html!./index.html');
 var jQuery = require('jquery');
 var Promise = this.Promise = require('bluebird'); // phantomJS polyfill. seriously. :-|
@@ -110,3 +111,44 @@ test('api activity', {timeout: 2000}, function(t) {
         t.end();
     });
 });
+
+test.only('initial logged in state', function(t) {
+    t.plan(2);
+
+    var authCookieName = 'test_auth_cookie';
+    var username = 'test_user_name';
+    var myWidget;
+
+    // Fake an initial 'authorized' state by setting the appropriate cookie and
+    // stored credentials
+    // TODO: Figure out how to mock/spy on the 'auth' module
+    cookies.set(authCookieName, 'test_auth_value');
+    localStorage.COINS_AUTH_CREDENTIALS = JSON.stringify({
+        id: 'sampleAuthId',
+        key: 'sampleAuthKey',
+        username: username,
+    });
+
+    myWidget = testUtils.widgetFactory({
+        authCookieName: authCookieName,
+        baseUrl: 'http://localhost:12354',
+    });
+
+    // Hijack widget internals to ensure checks fire at the appropriate time
+    // TODO: Figure out better way to do this, maybe spies
+    var originalSetToLogout = myWidget.form.setToLogout;
+    myWidget.form.setToLogout = function(text) {
+        originalSetToLogout.call(myWidget.form, text);
+        t.ok(
+            jQuery(myWidget.element).text().indexOf(username) > 0,
+            'UI shows username'
+        );
+        testUtils.teardownWidget(myWidget);
+        t.end();
+    };
+
+    myWidget.once('login:success', function(response) {
+        t.equal(response.username, username, 'retrieves username');
+    });
+});
+
