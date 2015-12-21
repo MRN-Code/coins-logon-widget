@@ -2,7 +2,7 @@
 var EventEmitter = require('wolfy87-eventemitter');
 var assign = require('lodash/object/assign');
 var cloneDeep = require('lodash/lang/cloneDeep');
-var Auth = require('./lib/auth');
+var auth = require('./lib/auth');
 var Form = require('./lib/form');
 var FormGroup = require('./lib/form-group');
 var utils = require('./lib/utils');
@@ -46,7 +46,7 @@ function CoinsLogonWidget(options) {
     }
 
     // Configure auth
-    Auth.setOptions({
+    auth.setOptions({
         authCookieName: authCookieName,
         baseUrl: baseUrl,
     });
@@ -141,7 +141,7 @@ CoinsLogonWidget.prototype.login = function(formData) {
 
     this.form.setLoading();
 
-    return Auth.login(formData.username, formData.password)
+    return auth.login(formData.username, formData.password)
         .done(function(response) {
             /**
              * Successful authentication also contains information regarding
@@ -179,7 +179,7 @@ CoinsLogonWidget.prototype.logout = function() {
 
     this.form.setLoading();
 
-    Auth.logout()
+    auth.logout()
         .done(function(response) {
             self.form.clearLoading();
             self.emit(EVENTS.LOGOUT_SUCCESS, response);
