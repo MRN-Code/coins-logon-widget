@@ -40,6 +40,22 @@ test('get options', function(t) {
     t.end();
 });
 
+test('get username', function(t) {
+    var username = 'test_user_name';
+
+    t.notOk(auth.getUsername(), 'no username initially');
+
+    // Set behind the scenes
+    localStorage[AUTH_CREDENTIALS_KEY] = JSON.stringify({ username: username });
+
+    t.equal(auth.getUsername(), username, 'retrieves stored username');
+
+    // Clean up
+    localStorage[AUTH_CREDENTIALS_KEY] = JSON.stringify({});
+
+    t.end();
+});
+
 test('log out', function(t) {
     t.plan(4);
 

@@ -172,6 +172,17 @@ function mapApiError(error) {
 }
 
 /**
+ * Get username.
+ *
+ * @return {string}
+ */
+function getUsername() {
+    var credentials = getAuthCredentials();
+
+    return ('username' in credentials ? credentials.username : '');
+}
+
+/**
  * Log in.
  *
  * @param  {string}  username
@@ -280,4 +291,5 @@ module.exports = {
     login: login,
     logout: logout,
     isLoggedIn: isLoggedIn,
+    getUsername: getUsername,
 };
