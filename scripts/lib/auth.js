@@ -172,6 +172,17 @@ function mapApiError(error) {
 }
 
 /**
+ * Get username.
+ *
+ * @return {string}
+ */
+function getUsername() {
+    var credentials = getAuthCredentials();
+
+    return ('username' in credentials ? credentials.username : '');
+}
+
+/**
  * Log in.
  *
  * @param  {string}  username
@@ -229,6 +240,49 @@ function logout() {
 }
 
 /**
+ * Check if user is logged in.
+ *
+ * @return {jQuery.Deferred} Resolves with the value `true` if the user is
+ *                           logged in, `false` if the user isn't logged in.
+ *                           Rejects if the `jQuery.ajax` network call errors.
+ */
+function isLoggedIn() {
+    var authCookie = cookies.get(getOptions().authCookieName);
+    var credentials = getAuthCredentials();
+    var method;
+    var url;
+
+    if (
+        !authCookie ||
+        !credentials ||
+        (
+            credentials instanceof Object &&
+            (!('id' in credentials) || !('key' in credentials))
+        )
+    ) {
+        return jQuery.Deferred().resolve(false);
+    }
+
+    method = 'GET';
+    url = getApiUrl('/auth/cookies/' + authCookie);
+
+    return jQuery.ajax({
+        dataType: 'json',
+        type: method,
+        url: url,
+        xhrFields: {
+            withCredentials: true
+        },
+    })
+        .then(function(response) {
+            return ('error' in response && !response.error);
+        }, function() {
+
+            return false;
+        });
+}
+
+/**
  * Public API.
  */
 module.exports = {
@@ -236,4 +290,6 @@ module.exports = {
     setOptions: setOptions,
     login: login,
     logout: logout,
+    isLoggedIn: isLoggedIn,
+    getUsername: getUsername,
 };
