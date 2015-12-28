@@ -334,6 +334,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 
+	CoinsLogonWidget.VERSION = ("2.1.0"); // Injected via Webpack
+
 	CoinsLogonWidget.DEFAULTS = {
 	    classNames: {
 	        root: 'coins-logon-widget'

@@ -278,6 +278,8 @@ CoinsLogonWidget.prototype.onSubmit = function(event) {
     }
 };
 
+CoinsLogonWidget.VERSION = __VERSION__; // Injected via Webpack
+
 CoinsLogonWidget.DEFAULTS = {
     classNames: {
         root: 'coins-logon-widget'
