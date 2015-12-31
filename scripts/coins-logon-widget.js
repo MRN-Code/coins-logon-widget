@@ -26,9 +26,9 @@ var day = 24 * 60 * 60 * 1000;
 
 function CoinsLogonWidget(options) {
     EventEmitter.call(this);
-    var element = this._assertElement(options.el);
-    var baseUrl = this._assertString(options.baseUrl, 'baseUrl');
-    var authCookieName = this._assertString(options.authCookieName, 'authCookieName');
+    var element = utils.assertElement(options.el);
+    var baseUrl = utils.assertString(options.baseUrl, 'baseUrl');
+    var authCookieName = utils.assertString(options.authCookieName, 'authCookieName');
 
     this.options = assign(cloneDeep(CoinsLogonWidget.DEFAULTS), options);
 
@@ -59,31 +59,6 @@ function CoinsLogonWidget(options) {
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain#Example
 CoinsLogonWidget.prototype = Object.create(EventEmitter.prototype);
 CoinsLogonWidget.prototype.constructor = CoinsLogonWidget;
-
-CoinsLogonWidget.prototype._assertElement = function(element) {
-    if (!element) {
-        throw new TypeError('Element required');
-    } else if (!(element instanceof Node)) {
-        // Make sure `element` is an actual node
-        // http://stackoverflow.com/a/384380
-        throw new TypeError('Expected element to be a DOM node');
-    }
-
-    return element;
-};
-
-CoinsLogonWidget.prototype._assertString = function(str, prop) {
-    if (!str || typeof str !== 'string') {
-        throw new TypeError([
-            'expected string',
-            prop ? ' (' + prop + ')' : '',
-            ', received: ',
-            str.toString()
-        ].join(''));
-    }
-
-    return str;
-};
 
 CoinsLogonWidget.prototype._getElements = function(element) {
     var self = this;
