@@ -158,3 +158,19 @@ test('initial logged in state', function(t) {
         t.equal(response.username, username, 'retrieves username');
     });
 });
+
+test('horizontal form', function(t) {
+    var myWidget = testUtils.widgetFactory({
+        horizontal: true,
+    });
+    var $form = jQuery(myWidget.element).find('form');
+
+    t.ok(
+        $form.attr('class').indexOf('horizontal') !== -1,
+        'has horizontal class'
+    );
+
+    testUtils.teardownWidget(myWidget);
+
+    t.end();
+});

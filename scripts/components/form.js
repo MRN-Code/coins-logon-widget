@@ -13,6 +13,7 @@ var VNode = require('virtual-dom').VNode;
  * @param {object} props
  * @param {function} props.onSubmit
  * @param {string} [props.errorMessage]
+ * @param {boolean} [props.horizontal=false]
  * @param {boolean} [props.isLoading=false]
  * @param {boolean} [props.isLoggedIn=false]
  * @param {function} [props.onRedirectClick] Click handler for the redirect button
@@ -23,6 +24,7 @@ var VNode = require('virtual-dom').VNode;
  */
 function form(props) {
     var errorMessage = props.errorMessage;
+    var horizontal = !!props.horizontal;
     var inputs = props.inputs;
     var isLoading = typeof props.isLoading !== 'undefined' ?
         props.isLoading :
@@ -40,6 +42,10 @@ function form(props) {
     var className = 'coins-logon-widget-form';
     var passwordFormGroupProps;
     var usernameFormGroupProps;
+
+    if (horizontal) {
+        className += ' coins-logon-widget-form-horizontal';
+    }
 
     if (isLoggedIn) {
         children.push(

@@ -27,6 +27,8 @@ var utils = require('./lib/utils');
  * @param {boolean} [options.redirect=false]
  * @param {string} [options.redirectUrl]
  * @param {boolean} [options.checkAuth=false]
+ * @param {boolean} [options.horizontal=false] Whether to display the form
+ * horizontally, with inputs displayed left-to-right
  */
 function CoinsLogonWidget(options) {
     EventEmitter.call(this, options);
@@ -42,6 +44,7 @@ function CoinsLogonWidget(options) {
 
     this.element = utils.assertElement(options.el);
     this._state = {
+        horizontal: !!options.horizontal,
         isLoggedIn: false,
         onSubmit: bind(this.login, this),
         passwordProps: {
