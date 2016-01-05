@@ -132,13 +132,14 @@ test('initial logged in state', function(t) {
     myWidget = testUtils.widgetFactory({
         authCookieName: authCookieName,
         baseUrl: 'http://localhost:12354',
+        checkAuth: true,
     });
 
     // Hijack widget internals to ensure checks fire at the appropriate time
     // TODO: Figure out better way to do this, maybe spies
-    var originalSetToLogout = myWidget.form.setToLogout;
-    myWidget.form.setToLogout = function(text) {
-        originalSetToLogout.call(myWidget.form, text);
+    var originalUpdate = myWidget.update;
+    myWidget.update = function(newState) {
+        originalUpdate.call(myWidget, newState);
         t.ok(
             jQuery(myWidget.element).text().indexOf(username) > 0,
             'UI shows username'

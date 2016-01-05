@@ -1,5 +1,5 @@
 'use strict';
-var assign = require('lodash/object/assign');
+var merge = require('lodash/object/merge');
 var cookies = require('js-cookie');
 var hawk = require('hawk/lib/browser');
 
@@ -140,7 +140,7 @@ function getOptions() {
  * @return {object}
  */
 function setOptions(newOptions) {
-    assign(options, newOptions);
+    merge(options, newOptions);
     return getOptions();
 }
 

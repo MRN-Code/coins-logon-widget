@@ -1,6 +1,4 @@
 'use strict';
-var UniqueNumber = require('unique-number');
-var uniqueNumber = new UniqueNumber();
 
 function assertElement(element) {
     if (!element) {
@@ -60,45 +58,9 @@ function formatDay(day) {
     }
 }
 
-/**
- * Add event listener that fires once.
- * @{@link  https://github.com/insin/event-listener}
- */
-function once(target, eventType, callback) {
-    function listener() {
-        callback.apply(null, arguments);
-        target.removeEventListener(eventType, listener, false);
-    }
-
-    target.addEventListener(eventType, listener, false);
-}
-
-function removeElement(element) {
-    if (element) {
-        while (element.lastChild) {
-            element.removeChild(element.lastChild);
-        }
-    }
-
-    if (element.parentNode) {
-        element.parentNode.removeChild(element);
-    }
-}
-
-function uniqueId(string) {
-    if (typeof string !== 'string') {
-        string = '';
-    }
-
-    return string + uniqueNumber.generate();
-}
-
 module.exports = {
     assertElement: assertElement,
     assertString: assertString,
     callOrReturn: callOrReturn,
     formatDay: formatDay,
-    once: once,
-    removeElement: removeElement,
-    uniqueId: uniqueId,
 };

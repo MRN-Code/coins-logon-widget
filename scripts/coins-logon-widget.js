@@ -1,90 +1,79 @@
 'use strict';
-var EventEmitter = require('wolfy87-eventemitter');
-var assign = require('lodash/object/assign');
-var cloneDeep = require('lodash/lang/cloneDeep');
+
 var auth = require('./lib/auth');
-var Form = require('./lib/form');
-var FormGroup = require('./lib/form-group');
+var bind = require('lodash/function/bind');
+var createElement = require('virtual-dom/create-element');
+var diff = require('virtual-dom/diff');
+var EventEmitter = require('wolfy87-eventemitter');
+var form = require('./components/form');
+var merge = require('lodash/object/merge');
+var messages = require('./lib/messages');
+var patch = require('virtual-dom/patch');
+var uniqueId = require('lodash/utility/uniqueId');
 var utils = require('./lib/utils');
-require('./lib/polyfills.js');
 
-var EVENTS = {
-    INVALID: 'invalid',
-    LOGIN: 'login:init',
-    LOGIN_ERROR: 'login:error',
-    LOGIN_ACCOUNT_EXPIRED: 'login:accountExpired',
-    LOGIN_ACCOUNT_WILL_EXPIRE: 'login:accountWillExpire',
-    LOGIN_PASSWORD_EXPIRED: 'login:passwordExpired',
-    LOGIN_PASSWORD_WILL_EXPIRE: 'login:passwordWillExpire',
-    LOGIN_SUCCESS: 'login:success',
-    LOGOUT: 'logout:init',
-    LOGOUT_ERROR: 'logout:error',
-    LOGOUT_SUCCESS: 'logout:success'
-};
-
-var day = 24 * 60 * 60 * 1000;
-
+/**
+ * Coins logon widget.
+ * @class
+ * @extends EventEmitter
+ *
+ * @param {object} options
+ * @param {string} options.authCookieName
+ * @param {string} options.baseUrl
+ * @param {Node} options.el DOM node to append logon widget
+ * @param {object} [options.messages] Override default messages by passing a
+ * hash corresponding to account and password events. See {@link lib/messages}
+ * for specifics.
+ * @param {boolean} [options.redirect=false]
+ * @param {string} [options.redirectUrl]
+ * @param {boolean} [options.checkAuth=false]
+ */
 function CoinsLogonWidget(options) {
-    EventEmitter.call(this);
-    var element = utils.assertElement(options.el);
-    var baseUrl = utils.assertString(options.baseUrl, 'baseUrl');
-    var authCookieName = utils.assertString(options.authCookieName, 'authCookieName');
+    EventEmitter.call(this, options);
 
-    this.options = assign(cloneDeep(CoinsLogonWidget.DEFAULTS), options);
+    var EVENTS = CoinsLogonWidget.EVENTS;
+    var self = this;
 
-    /**
-     * If the form has hidden labels or a horizontal layout apply the
-     * `hiddenLabel` form group option. This persists the option down to the
-     * `FormGroup` elements.
-     *
-     * @todo  Devise a better solution for passing down options
-     */
-    if (this.options.hiddenLabels || this.options.horizontal) {
-        this.options.formGroups.forEach(function(formGroupOption) {
-            formGroupOption.hiddenLabel = true;
-        });
-    }
+    this.element = utils.assertElement(options.el);
+    this._state = {
+        isLoggedIn: false,
+        onSubmit: bind(this.login, this),
+        passwordProps: {
+            id: uniqueId('coins-logon-widget-'),
+            name: 'password',
+            type: 'password',
+        },
+        usernameProps: {
+            id: uniqueId('coins-logon-widget-'),
+            name: 'username',
+        },
+    };
+    this._options = {};
+
+    this._options.messages = options.messages ?
+        merge({}, messages, options.messages) :
+        messages;
+
+    this._options.checkAuth = typeof options.checkAuth === 'boolean' ?
+        options.checkAuth :
+        false;
+    this._options.redirect = typeof options.redirect === 'boolean' ?
+        options.redirect :
+        false;
+    this._options.redirectUrl = typeof options.redirectUrl === 'string' ?
+        options.redirectUrl :
+        undefined;
 
     // Configure auth
     auth.setOptions({
-        authCookieName: authCookieName,
-        baseUrl: baseUrl,
+        authCookieName: utils.assertString(
+            options.authCookieName,
+            'authCookieName'
+        ),
+        baseUrl: utils.assertString(options.baseUrl, 'baseUrl'),
     });
 
-    this.element = this._getElements(element);
-    this._setState();
-}
-
-// Inherit from `EventEmitter`
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain#Example
-CoinsLogonWidget.prototype = Object.create(EventEmitter.prototype);
-CoinsLogonWidget.prototype.constructor = CoinsLogonWidget;
-
-CoinsLogonWidget.prototype._getElements = function(element) {
-    var self = this;
-
-    this.form = new Form({
-        formGroups: this.options.formGroups.reverse(),
-        horizontal: this.options.horizontal,
-        login: function() {
-            self.emit(EVENTS.LOGIN, self.form.getFormData());
-        },
-
-        logout: function() {
-            self.emit(EVENTS.LOGOUT);
-        }
-    });
-
-    element.innerHTML = '';
-    element.className = this.options.classNames.root;
-    element.appendChild(this.form.element);
-
-    return element;
-};
-
-CoinsLogonWidget.prototype._setState = function() {
-    var self = this;
-
+    // Wire up events
     this.on(EVENTS.LOGIN, this.login);
     this.on(EVENTS.LOGIN_ERROR, this.onError);
     this.on(EVENTS.LOGIN_ACCOUNT_EXPIRED, this.onAccountExpired);
@@ -96,37 +85,83 @@ CoinsLogonWidget.prototype._setState = function() {
     this.on(EVENTS.LOGOUT_ERROR, this.onError);
     this.on(EVENTS.LOGOUT_SUCCESS, this.onLogout);
 
-    auth.isLoggedIn().then(function(isLoggedIn) {
-        if (isLoggedIn) {
-            self.emit(EVENTS.LOGIN_SUCCESS, {
-                username: auth.getUsername(),
-            });
-        }
-    });
-};
+    this.init();
+
+    // Perform an auth check if the option is set
+    if (this._options.checkAuth) {
+        auth.isLoggedIn().then(function(isLoggedIn) {
+            if (isLoggedIn) {
+                self.emit(EVENTS.LOGIN_SUCCESS, {
+                    username: auth.getUsername(),
+                });
+            }
+        });
+    }
+}
+
+/**
+ * Inherit from `EventEmitter`:
+ * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain#Example}
+ */
+CoinsLogonWidget.prototype = Object.create(EventEmitter.prototype);
+CoinsLogonWidget.prototype.constructor = CoinsLogonWidget;
+
+/* ==========================================================================
+   Actions
+   ========================================================================== */
 
 CoinsLogonWidget.prototype.destroy = function() {
-    this.form.destroy();
-    delete this.form;
+    this.update(null);
+
     this.removeAllListeners();
-    delete this.options;
+
+    delete this._options;
+    delete this._rootNode;
+    delete this._state;
+    delete this._tree;
     delete this.element;
 };
 
-CoinsLogonWidget.prototype.login = function(formData) {
-    var self = this;
-    var validations = self.form.validate();
+CoinsLogonWidget.prototype.init = function() {
+    this._tree = form(this._state);
+    this._rootNode = createElement(this._tree);
+    this.element.className = this.element.className + ' coins-logon-widget';
+    this.element.appendChild(this._rootNode);
+};
 
-    if (validations !== true) {
-        self.emit(EVENTS.INVALID, validations);
-        return;
-    } else {
-        self.form.clearMessage();
+CoinsLogonWidget.prototype.login = function() {
+    var self = this;
+    var EVENTS = CoinsLogonWidget.EVENTS;
+    var password = this.element.querySelector('input[name=password]').value;
+    var username = this.element.querySelector('input[name=username]').value;
+    var state;
+
+    // Validate input (make sure it isn't empty)
+    if (!username || !password) {
+        state = {};
+
+        if (!username) {
+            state.usernameProps = {
+                errorMessage: 'Missing username!',
+                onKeyPress: bind(this.onKeyPress, this),
+            };
+            this.emit(EVENTS.INVALID, { field: 'username' });
+        }
+
+        if (!password) {
+            state.passwordProps = {
+                errorMessage: 'Missing password!',
+                onKeyPress: bind(this.onKeyPress, this),
+            };
+            this.emit(EVENTS.INVALID, { field: 'password' });
+        }
+
+        return this.update(state);
     }
 
-    this.form.setLoading();
+    this.update({ isLoading: true });
 
-    return auth.login(formData.username, formData.password)
+    return auth.login(username, password)
         .done(function(response) {
             /**
              * Successful authentication also contains information regarding
@@ -134,21 +169,22 @@ CoinsLogonWidget.prototype.login = function(formData) {
              * expired the widget needs to handle it here.
              */
             var accountExpiration = Date.parse(response.user.acctExpDate);
+            var DAY = CoinsLogonWidget.DAY;
             var now = Date.now();
             var passwordExpiration = Date.parse(response.user.passwordExpDate);
 
-            self.form.clearLoading();
+            self.update({ isLoading: false });
 
-            if (accountExpiration - now < day * 10) {
+            if (accountExpiration - now < DAY * 10) {
                 self.emit(EVENTS.LOGIN_ACCOUNT_WILL_EXPIRE, response);
-            } else if (passwordExpiration - now < day * 10) {
+            } else if (passwordExpiration - now < DAY * 10) {
                 self.emit(EVENTS.LOGIN_PASSWORD_WILL_EXPIRE, response);
             } else {
                 self.emit(EVENTS.LOGIN_SUCCESS, response);
             }
         })
         .fail(function(error) {
-            self.form.clearLoading();
+            self.update({ isLoading: false });
             if (error === 'Password expired') {
                 self.emit(EVENTS.LOGIN_PASSWORD_EXPIRED, error);
             } else if (error === 'Account expired') {
@@ -160,49 +196,54 @@ CoinsLogonWidget.prototype.login = function(formData) {
 };
 
 CoinsLogonWidget.prototype.logout = function() {
+    var EVENTS = CoinsLogonWidget.EVENTS;
     var self = this;
 
-    this.form.setLoading();
+    this.update({ isLoading: true });
 
-    auth.logout()
+    return auth.logout()
         .done(function(response) {
-            self.form.clearLoading();
+            self.update({ isLoading: false });
             self.emit(EVENTS.LOGOUT_SUCCESS, response);
         })
         .fail(function(error) {
-            self.form.clearLoading();
+            self.update({ isLoading: false });
             self.emit(EVENTS.LOGOUT_ERROR, error);
         });
 };
 
-CoinsLogonWidget.prototype.onAccountExpired = function(response) {
-    var message = utils.callOrReturn(this.options.messages.accountExpired);
-    this.form.setErrorMessage(message);
+CoinsLogonWidget.prototype.update = function(newState) {
+    if (newState === this._state) {
+        return;
+    }
+
+    this._state = merge({}, this._state, newState);
+
+    var newTree = form(this._state);
+    var patches = diff(this._tree, newTree);
+
+    this._rootNode = patch(this._rootNode, patches);
+    this._tree = newTree;
+};
+
+/* ==========================================================================
+   Built-in event listeners
+   ========================================================================== */
+
+CoinsLogonWidget.prototype.onAccountExpired = function() {
+    var message = utils.callOrReturn(this._options.messages.accountExpired);
+    this.update({ errorMessage: message });
 };
 
 CoinsLogonWidget.prototype.onAccountWillExpire = function(response) {
     var accountExpiration = Date.parse(response.user.acctExpDate);
     var now = Date.now();
     var message = utils.callOrReturn(
-        this.options.messages.accountWillExpire,
-        [utils.formatDay((accountExpiration - now) / day)]
+        this._options.messages.accountWillExpire,
+        [utils.formatDay((accountExpiration - now) / CoinsLogonWidget.DAY)]
     );
-    this.form.setErrorMessage(message);
-};
 
-CoinsLogonWidget.prototype.onPasswordExpired = function(response) {
-    var message = utils.callOrReturn(this.options.messages.passwordExpired);
-    this.form.setErrorMessage(message);
-};
-
-CoinsLogonWidget.prototype.onPasswordWillExpire = function(response) {
-    var passwordExpiration = Date.parse(response.user.passwordExpDate);
-    var now = Date.now();
-    var message = utils.callOrReturn(
-        this.options.messages.passwordWillExpire,
-        [utils.formatDay((passwordExpiration - now) / day)]
-    );
-    this.form.setErrorMessage(message);
+    this.update({ errorMessage: message });
 };
 
 CoinsLogonWidget.prototype.onError = function(error) {
@@ -214,72 +255,74 @@ CoinsLogonWidget.prototype.onError = function(error) {
         message = 'Unknown error!';
     }
 
-    this.form.setErrorMessage(message);
+    this.update({ errorMessage: message });
     console.error(error);
 };
 
+CoinsLogonWidget.prototype.onKeyPress = function(event) {
+    var clearErrorProps = {
+        errorMessage: null,
+        onKeyPress: null,
+    };
+
+    if (event.target.name === 'username') {
+        this.update({ usernameProps: clearErrorProps });
+    }
+
+    if (event.target.name === 'password') {
+        this.update({ passwordProps: clearErrorProps });
+    }
+};
+
 CoinsLogonWidget.prototype.onLogin = function(response) {
-    var username = response.username;
-    var statusText = username ?
-        'Logged in as <strong>' + username + '</strong>.' :
-        'Logged in.';
-
-    this.form.setToLogout(statusText);
-};
-
-CoinsLogonWidget.prototype.onLogout = function(response) {
-    this.form.setToLogin();
-};
-
-CoinsLogonWidget.prototype.onSubmit = function(event) {
-    event.preventDefault();
-
-    var errors;
-
-    this.formGroups.forEach(function(formGroup) {
-        var isValid = formGroup.validate();
-
-        //TODO: emit validation error events
-        if (!isValid) {
-            errors = true;
-        }
-    });
-
-    if (!errors) {
-        this.emit('submitted', event);
-
-        //TODO: Make authentication pluggable
-        this.login();
+    // Redirect if the option is set and there's a URL
+    if (this._options.redirect && this._options.redirectUrl) {
+        window.location = this._options.redirectUrl;
+    } else {
+        this.update({
+            isLoggedIn: true,
+            username: response.username,
+        });
     }
 };
 
-CoinsLogonWidget.DEFAULTS = {
-    classNames: {
-        root: 'coins-logon-widget'
-    },
-    formGroups: [{
-        inputName: 'username',
-        labelText: 'Username:',
-        placeholder: ''
-    }, {
-        inputName: 'password',
-        labelText: 'Password:',
-        placeholder: '',
-        type: 'password'
-    }],
-    hiddenLabels: false,
-    horizontal: false,
-    messages: {
-        accountExpired: 'Your account has expired.',
-        accountWillExpire: function(offset) {
-            return 'Your account will expire in ' + offset + '.';
-        },
+CoinsLogonWidget.prototype.onLogout = function() {
+    this.update({ isLoggedIn: false });
+};
 
-        passwordExpired: 'Your password has expired.',
-        passwordWillExpire: function(offset) {
-            return 'Your password will expire in ' + offset + '.';
-        }
-    }
+CoinsLogonWidget.prototype.onPasswordExpired = function() {
+    var message = utils.callOrReturn(this._options.messages.passwordExpired);
+    this.update({ errorMessage: message });
+};
+
+CoinsLogonWidget.prototype.onPasswordWillExpire = function(response) {
+    var passwordExpiration = Date.parse(response.user.passwordExpDate);
+    var now = Date.now();
+    var message = utils.callOrReturn(
+        this._options.messages.passwordWillExpire,
+        [utils.formatDay((passwordExpiration - now) / CoinsLogonWidget.DAY)]
+    );
+    this.update({ errorMessage: message });
+};
+
+/* ==========================================================================
+   Static properties
+   ========================================================================== */
+
+CoinsLogonWidget.DAY = 24 * 60 * 60 * 1000;
+
+CoinsLogonWidget.EVENTS = {
+    INVALID: 'invalid',
+    LOGIN: 'login:init',
+    LOGIN_ERROR: 'login:error',
+    LOGIN_ACCOUNT_EXPIRED: 'login:accountExpired',
+    LOGIN_ACCOUNT_WILL_EXPIRE: 'login:accountWillExpire',
+    LOGIN_PASSWORD_EXPIRED: 'login:passwordExpired',
+    LOGIN_PASSWORD_WILL_EXPIRE: 'login:passwordWillExpire',
+    LOGIN_SUCCESS: 'login:success',
+    LOGOUT: 'logout:init',
+    LOGOUT_ERROR: 'logout:error',
+    LOGOUT_SUCCESS: 'logout:success'
 };
 
 module.exports = CoinsLogonWidget;
