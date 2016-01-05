@@ -43,6 +43,8 @@ test('get options', function(t) {
 test('get username', function(t) {
     var username = 'test_user_name';
 
+    localStorage[AUTH_CREDENTIALS_KEY] = JSON.stringify({});
+
     t.notOk(auth.getUsername(), 'no username initially');
 
     // Set behind the scenes
