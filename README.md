@@ -14,6 +14,21 @@ var widget = new CoinsLogonWidget({
 });
 ```
 
+#### Authorization Check
+
+Add a `checkAuth` property with a value of `true` to make the widget perform an initial authorization check against your API:
+
+```js
+var widget = new CoinsLogonWidget({
+    el: document.getElementById('logon-area'),
+    baseUrl: 'http://localhost:9000/api/v1',
+    authCookieName: 'COINS_Auth_User-production',
+    checkAuth: true,
+});
+```
+
+The widget will change to its logged-in state if the check is successful.
+
 ### Methods
 
 You may call these methods on an instance of the widget:
