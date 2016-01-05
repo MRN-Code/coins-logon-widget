@@ -1,7 +1,6 @@
 var path = require('path');
 var webpack = require('webpack');
 var DedupePlugin = webpack.optimize.DedupePlugin;
-var DefinePlugin = webpack.DefinePlugin;
 var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 var pkg = require('./package.json');
 
@@ -22,9 +21,6 @@ module.exports = {
         umdNamedDefine: true,
     },
     plugins: [
-        new DefinePlugin({
-            __VERSION__: JSON.stringify(pkg.version),
-        }),
         new DedupePlugin()
     ].concat(isDev ? [
         new webpack.optimize.UglifyJsPlugin({
