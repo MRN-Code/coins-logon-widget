@@ -34,6 +34,12 @@ function CoinsLogonWidget(options) {
     var EVENTS = CoinsLogonWidget.EVENTS;
     var self = this;
 
+    var authCookieName = utils.assertString(
+        options.authCookieName,
+        'authCookieName'
+    );
+    var baseUrl = utils.assertString(options.baseUrl, 'baseUrl');
+
     this.element = utils.assertElement(options.el);
     this._state = {
         isLoggedIn: false,
@@ -48,7 +54,10 @@ function CoinsLogonWidget(options) {
             name: 'username',
         },
     };
-    this._options = {};
+    this._options = {
+        authCookieName: authCookieName,
+        baseUrl: baseUrl,
+    };
 
     this._options.messages = options.messages ?
         merge({}, messages, options.messages) :
@@ -66,11 +75,8 @@ function CoinsLogonWidget(options) {
 
     // Configure auth
     auth.setOptions({
-        authCookieName: utils.assertString(
-            options.authCookieName,
-            'authCookieName'
-        ),
-        baseUrl: utils.assertString(options.baseUrl, 'baseUrl'),
+        authCookieName: authCookieName,
+        baseUrl: baseUrl,
     });
 
     // Wire up events
@@ -162,7 +168,7 @@ CoinsLogonWidget.prototype.login = function() {
     this.update({ isLoading: true });
 
     return auth.login(username, password)
-        .done(function(response) {
+        .then(function(response) {
             /**
              * Successful authentication also contains information regarding
              * a user's account status. If the user's password or account is
@@ -182,8 +188,10 @@ CoinsLogonWidget.prototype.login = function() {
             } else {
                 self.emit(EVENTS.LOGIN_SUCCESS, response);
             }
-        })
-        .fail(function(error) {
+
+            return response;
+        }, function(error) {
+
             self.update({ isLoading: false });
             if (error === 'Password expired') {
                 self.emit(EVENTS.LOGIN_PASSWORD_EXPIRED, error);
@@ -192,6 +200,8 @@ CoinsLogonWidget.prototype.login = function() {
             } else {
                 self.emit(EVENTS.LOGIN_ERROR, error);
             }
+
+            return error;
         });
 };
 
@@ -202,13 +212,17 @@ CoinsLogonWidget.prototype.logout = function() {
     this.update({ isLoading: true });
 
     return auth.logout()
-        .done(function(response) {
+        .then(function(response) {
             self.update({ isLoading: false });
             self.emit(EVENTS.LOGOUT_SUCCESS, response);
-        })
-        .fail(function(error) {
+
+            return response;
+        }, function(error) {
+
             self.update({ isLoading: false });
             self.emit(EVENTS.LOGOUT_ERROR, error);
+
+            return error;
         });
 };
 

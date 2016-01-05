@@ -31,7 +31,7 @@ function teardownWidget(widget) {
     }
 
     // Remove cookie
-    cookies.remove(widget.options.authCookieName);
+    cookies.remove(widget._options.authCookieName);
 
     // Clear stored authentication
     // TODO: Export auth key in 'auth' module
@@ -41,9 +41,10 @@ function teardownWidget(widget) {
 }
 
 function setWidgetFields(opts) {
-    var widget = opts.widget;
-    widget.form.formGroups[0].element.children[1].value = opts.username;
-    widget.form.formGroups[1].element.children[1].value = opts.password;
+    var $widget = jQuery(opts.widget.element);
+
+    $widget.find('input[name=username]').val(opts.username);
+    $widget.find('input[name=password]').val(opts.password);
 }
 
 module.exports = {

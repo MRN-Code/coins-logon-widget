@@ -100,16 +100,21 @@ test('api activity', {timeout: 2000}, function(t) {
         username: 'someun',
         password: 'somepassword',
     };
+
     testUtils.setWidgetFields(wigetData);
-    Promise.resolve(myWidget.login(wigetData))
-    .then(function() {
-        t.equal(jQuery('#api_call_form button').text(), 'Log Out', 'login cycle successful');
-    })
-    .catch(t.fail)
-    .then(function() {
-        testUtils.teardownWidget(myWidget);
-        t.end();
-    });
+
+    myWidget.login(wigetData)
+        .then(function() {
+            t.ok(
+                jQuery('#api_call_form button').eq(0).text(),
+                'Log Out',
+                'login cycle successful'
+            );
+        }, t.end)
+        .then(function() {
+            testUtils.teardownWidget(myWidget);
+            t.end();
+        });
 });
 
 test('initial logged in state', function(t) {
@@ -144,6 +149,7 @@ test('initial logged in state', function(t) {
             jQuery(myWidget.element).text().indexOf(username) > 0,
             'UI shows username'
         );
+        myWidget.update = originalUpdate;
         testUtils.teardownWidget(myWidget);
         t.end();
     };
