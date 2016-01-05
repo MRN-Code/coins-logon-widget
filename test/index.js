@@ -112,7 +112,7 @@ test('api activity', {timeout: 2000}, function(t) {
     });
 });
 
-test.only('initial logged in state', function(t) {
+test('initial logged in state', function(t) {
     t.plan(2);
 
     var authCookieName = 'test_auth_cookie';
@@ -151,4 +151,3 @@ test.only('initial logged in state', function(t) {
         t.equal(response.username, username, 'retrieves username');
     });
 });
-
