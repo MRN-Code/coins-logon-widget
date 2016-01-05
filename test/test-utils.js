@@ -11,6 +11,16 @@ var defaults = {
     baseUrl: 'coins-api-root',
 };
 
+/**
+ * Get a widget's jQuery-wrapped notification element.
+ *
+ * @param {CoinsLogonWidget} widget Widget instance
+ * @returns {jQuery} Widget's notification element
+ */
+function getNotification(widget) {
+    return jQuery(widget.element).find('.coins-logon-widget-notification');
+}
+
 function widgetFactory(options) {
     if (typeof options === 'undefined') {
         options = {};
@@ -48,6 +58,7 @@ function setWidgetFields(opts) {
 }
 
 module.exports = {
+    getNotification: getNotification,
     setWidgetFields: setWidgetFields,
     teardownWidget: teardownWidget,
     widgetFactory: widgetFactory,

@@ -3,6 +3,7 @@ var CoinsLogonWidget = require('../scripts/coins-logon-widget.js');
 var cookies = require('js-cookie');
 var html = require('html!./index.html');
 var jQuery = require('jquery');
+var messages = require('../scripts/lib/messages.js');
 var Promise = this.Promise = require('bluebird'); // phantomJS polyfill. seriously. :-|
 var testUtils = require('./test-utils');
 
@@ -172,5 +173,51 @@ test('horizontal form', function(t) {
 
     testUtils.teardownWidget(myWidget);
 
+    t.end();
+});
+
+test('default messages', function(t) {
+    var EVENTS = CoinsLogonWidget.EVENTS;
+    var myWidget = testUtils.widgetFactory();
+    var offset = '2 days';
+    var tomorrow = new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString();
+
+    myWidget.emit(EVENTS.LOGIN_ACCOUNT_EXPIRED);
+    t.equal(
+        testUtils.getNotification(myWidget).text(),
+        messages.accountExpired,
+        'Shows account expired message'
+    );
+
+    myWidget.emit(EVENTS.LOGIN_ACCOUNT_WILL_EXPIRE, {
+        user: {
+            acctExpDate: tomorrow,
+        },
+    });
+    t.equal(
+        testUtils.getNotification(myWidget).text(),
+        messages.accountWillExpire(offset),
+        'Shows account will expire message'
+    );
+
+    myWidget.emit(EVENTS.LOGIN_PASSWORD_EXPIRED);
+    t.equal(
+        testUtils.getNotification(myWidget).text(),
+        messages.passwordExpired,
+        'Shows password expired message'
+    );
+
+    myWidget.emit(EVENTS.LOGIN_PASSWORD_WILL_EXPIRE, {
+        user: {
+            passwordExpDate: tomorrow,
+        },
+    });
+    t.equal(
+        testUtils.getNotification(myWidget).text(),
+        messages.passwordWillExpire(offset),
+        'Shows password will expire message'
+    );
+
+    testUtils.teardownWidget(myWidget);
     t.end();
 });

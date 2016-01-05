@@ -23,7 +23,7 @@ function notification(props) {
 
     if (Array.isArray(text)) {
         children = text;
-    } else if (typeof props.children === 'string') {
+    } else if (typeof text === 'string') {
         if (text.indexOf('<') !== -1 && text.indexOf('>') !== -1) {
             properties.innerHTML = text;
         } else {
@@ -31,7 +31,7 @@ function notification(props) {
         }
     }
 
-    return new VNode('div', properties, (children ? children : undefined));
+    return new VNode('div', properties, children);
 }
 
 module.exports = notification;
