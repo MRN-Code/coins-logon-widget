@@ -28,7 +28,7 @@ function button(props) {
     };
 
     if (onClick) {
-        properties.onClick = onClick;
+        properties.onclick = onClick;
     }
 
     return new VNode('button', properties, [new VText(text)]);
