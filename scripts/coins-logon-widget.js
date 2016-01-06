@@ -123,14 +123,7 @@ CoinsLogonWidget.prototype.constructor = CoinsLogonWidget;
 
 CoinsLogonWidget.prototype.destroy = function() {
     this.update(null);
-
     this.removeAllListeners();
-
-    delete this._options;
-    delete this._rootNode;
-    delete this._state;
-    delete this._tree;
-    delete this.element;
 };
 
 CoinsLogonWidget.prototype.init = function() {
