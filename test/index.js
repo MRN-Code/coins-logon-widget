@@ -7,6 +7,14 @@ var messages = require('../scripts/lib/messages.js');
 var Promise = this.Promise = require('bluebird'); // phantomJS polyfill. seriously. :-|
 var testUtils = require('./test-utils');
 
+/**
+ * Bind polyfill for PhantomJS.
+ * {@link https://github.com/Raynos/function-bind}
+ */
+if (!('bind' in Function)) {
+    Function.prototype.bind = require('function-bind');
+}
+
 jQuery(window.document.body).append(html);
 
 test('constructor, basic', function(t) {

@@ -1,7 +1,6 @@
 'use strict';
 
 var auth = require('./lib/auth');
-var bind = require('lodash/function/bind');
 var createElement = require('virtual-dom/create-element');
 var diff = require('virtual-dom/diff');
 var EventEmitter = require('wolfy87-eventemitter');
@@ -46,7 +45,7 @@ function CoinsLogonWidget(options) {
     this._state = {
         horizontal: !!options.horizontal,
         isLoggedIn: false,
-        onSubmit: bind(this.login, this),
+        onSubmit: this.login.bind(this),
         passwordProps: {
             id: uniqueId('coins-logon-widget-'),
             name: 'password',
@@ -152,7 +151,7 @@ CoinsLogonWidget.prototype.login = function() {
         if (!username) {
             state.usernameProps = {
                 errorMessage: 'Missing username!',
-                onKeyPress: bind(this.onKeyPress, this),
+                onKeyPress: this.onKeyPress.bind(this),
             };
             this.emit(EVENTS.INVALID, { field: 'username' });
         }
@@ -160,7 +159,7 @@ CoinsLogonWidget.prototype.login = function() {
         if (!password) {
             state.passwordProps = {
                 errorMessage: 'Missing password!',
-                onKeyPress: bind(this.onKeyPress, this),
+                onKeyPress: this.onKeyPress.bind(this),
             };
             this.emit(EVENTS.INVALID, { field: 'password' });
         }
