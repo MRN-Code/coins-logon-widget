@@ -221,3 +221,66 @@ test('default messages', function(t) {
     testUtils.teardownWidget(myWidget);
     t.end();
 });
+
+test('custom messages', function(t) {
+    var EVENTS = CoinsLogonWidget.EVENTS;
+    var customMessages = {
+        accountExpired: Math.random().toString(),
+        accountWillExpire: function(offset) {
+            return [
+                '<p>Your account will expire in ' + offset + '.',
+                '<a href="#">Reset it!</a></p>',
+            ].join(' ');
+        },
+
+        passwordExpired: Math.random().toString(),
+        passwordWillExpire: function(offset) {
+            return '<p><span>Your</span> password <b>is</b> <em>gross</em></p>';
+        },
+
+    };
+    var myWidget = testUtils.widgetFactory({
+        messages: customMessages,
+    });
+    var offset = '2 days';
+    var tomorrow = new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString();
+
+    myWidget.emit(EVENTS.LOGIN_ACCOUNT_EXPIRED);
+    t.equal(
+        testUtils.getNotification(myWidget).html(),
+        customMessages.accountExpired,
+        'Shows account expired message'
+    );
+
+    myWidget.emit(EVENTS.LOGIN_ACCOUNT_WILL_EXPIRE, {
+        user: {
+            acctExpDate: tomorrow,
+        },
+    });
+    t.equal(
+        testUtils.getNotification(myWidget).html(),
+        customMessages.accountWillExpire(offset),
+        'Shows account will expire message'
+    );
+
+    myWidget.emit(EVENTS.LOGIN_PASSWORD_EXPIRED);
+    t.equal(
+        testUtils.getNotification(myWidget).html(),
+        customMessages.passwordExpired,
+        'Shows password expired message'
+    );
+
+    myWidget.emit(EVENTS.LOGIN_PASSWORD_WILL_EXPIRE, {
+        user: {
+            passwordExpDate: tomorrow,
+        },
+    });
+    t.equal(
+        testUtils.getNotification(myWidget).html(),
+        customMessages.passwordWillExpire(offset),
+        'Shows password will expire message'
+    );
+
+    testUtils.teardownWidget(myWidget);
+    t.end();
+});
