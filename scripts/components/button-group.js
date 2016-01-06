@@ -9,6 +9,7 @@ var VText = require('virtual-dom').VText;
  *
  * @param {object} props
  * @param {string} props.text
+ * @param {string} [props.href]
  * @param {function} [props.onClick]
  * @param {string} [props.style=primary]
  * @param {string} [props.type=button]
@@ -16,6 +17,7 @@ var VText = require('virtual-dom').VText;
  */
 function _button(props) {
     var className = 'coins-logon-widget-button';
+    var href = props.href;
     var onClick = props.onClick;
     var style = props.style || 'primary';
     var text = props.text;
@@ -25,14 +27,28 @@ function _button(props) {
 
     var properties = {
         className: className,
-        type: type,
     };
+    var tag;
 
-    if (onClick) {
-        properties.onclick = onClick;
+    if (type === 'link') {
+        tag = 'a';
+
+        if (href) {
+            properties.href = href;
+        }
+    } else {
+        tag = 'button';
+        properties.type = type;
     }
 
-    return new VNode('button', properties, [new VText(text)]);
+    if (onClick) {
+        properties.onclick = function(event) {
+            event.preventDefault();
+            onClick(event);
+        };
+    }
+
+    return new VNode(tag, properties, [new VText(text)]);
 }
 
 /**

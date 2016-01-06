@@ -42,20 +42,6 @@ function CoinsLogonWidget(options) {
     var baseUrl = utils.assertString(options.baseUrl, 'baseUrl');
 
     this.element = utils.assertElement(options.el);
-    this._state = {
-        horizontal: !!options.horizontal,
-        isLoggedIn: false,
-        onSubmit: this.login.bind(this),
-        passwordProps: {
-            id: uniqueId('coins-logon-widget-'),
-            name: 'password',
-            type: 'password',
-        },
-        usernameProps: {
-            id: uniqueId('coins-logon-widget-'),
-            name: 'username',
-        },
-    };
     this._options = {
         authCookieName: authCookieName,
         baseUrl: baseUrl,
@@ -74,6 +60,23 @@ function CoinsLogonWidget(options) {
     this._options.redirectUrl = typeof options.redirectUrl === 'string' ?
         options.redirectUrl :
         undefined;
+
+    // Set initial state
+    this._state = {
+        horizontal: !!options.horizontal,
+        isLoggedIn: false,
+        onSubmit: this.login.bind(this),
+        passwordProps: {
+            id: uniqueId('coins-logon-widget-'),
+            name: 'password',
+            type: 'password',
+        },
+        redirectUrl: this._options.redirectUrl,
+        usernameProps: {
+            id: uniqueId('coins-logon-widget-'),
+            name: 'username',
+        },
+    };
 
     // Configure auth
     auth.setOptions({

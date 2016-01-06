@@ -292,3 +292,26 @@ test('custom messages', function(t) {
     testUtils.teardownWidget(myWidget);
     t.end();
 });
+
+test('redirect property/button', function(t) {
+    var redirectUrl = 'http://localhost:1337';
+    var myWidget = testUtils.widgetFactory({
+        redirectUrl: redirectUrl,
+    });
+    var $widget = jQuery(myWidget.element);
+
+    myWidget.update({ isLoggedIn: true });
+    t.ok(
+        $widget.find('a.coins-logon-widget-button').length,
+        'Has redirect link'
+    );
+    t.equal(
+        $widget.find('a.coins-logon-widget-button').attr('href'),
+        redirectUrl,
+        'Redirect URL added to link'
+    );
+
+    testUtils.teardownWidget(myWidget);
+    t.end();
+});
+

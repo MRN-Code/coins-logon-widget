@@ -16,7 +16,7 @@ var VNode = require('virtual-dom').VNode;
  * @param {boolean} [props.horizontal=false]
  * @param {boolean} [props.isLoading=false]
  * @param {boolean} [props.isLoggedIn=false]
- * @param {function} [props.onRedirectClick] Click handler for the redirect button
+ * @param {string} [props.redirectUrl] URL to redirect to when logged in
  * @param {string} [props.passwordProps]
  * @param {string} [props.username]
  * @param {string} [props.usernameProps]
@@ -32,14 +32,15 @@ function form(props) {
     var isLoggedIn = typeof props.isLoggedIn !== 'undefined' ?
         props.isLoggedIn :
         false;
-    var onRedirectClick = props.onRedirectClick;
     var onSubmit = props.onSubmit;
     var passwordProps = props.passwordProps;
+    var redirectUrl = props.redirectUrl;
     var username = props.username;
     var usernameProps = props.usernameProps;
 
     var children = [];
     var className = 'coins-logon-widget-form';
+    var buttonGroupProps;
     var passwordFormGroupProps;
     var usernameFormGroupProps;
 
@@ -48,16 +49,23 @@ function form(props) {
     }
 
     if (isLoggedIn) {
+        buttonGroupProps = [{
+            style: 'secondary',
+            text: 'Log Out',
+            type: 'submit',
+        }];
+
+        if (redirectUrl) {
+            buttonGroupProps.push({
+                href: redirectUrl,
+                text: 'Go to COINS →',
+                type: 'link',
+            });
+        };
+
         children.push(
             status({ username: username }),
-            buttonGroup({
-                style: 'secondary',
-                text: 'Log Out',
-                type: 'submit',
-            }, {
-                onClick: onRedirectClick,
-                text: 'Go to COINS →',
-            })
+            buttonGroup.apply(null, buttonGroupProps)
         );
     } else {
         if (errorMessage) {
