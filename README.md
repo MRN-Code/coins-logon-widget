@@ -14,6 +14,35 @@ var widget = new CoinsLogonWidget({
 });
 ```
 
+#### Authorization Check
+
+Add a `checkAuth` property with a value of `true` to make the widget perform an initial authorization check against your API:
+
+```js
+var widget = new CoinsLogonWidget({
+    el: document.getElementById('logon-area'),
+    baseUrl: 'http://localhost:9000/api/v1',
+    authCookieName: 'COINS_Auth_User-production',
+    checkAuth: true,
+});
+```
+
+The widget will change to its logged-in state if the check is successful.
+
+#### Redirect
+
+To make the widget redirect upon successful log in, add a `redirect` property with a value of `true` and a `redirectUrl` property with the URL to redirect to.
+
+```js
+var widget = new CoinsLogonWidget({
+    el: document.getElementById('logon-area'),
+    baseUrl: 'http://localhost:9000/api/v1',
+    authCookieName: 'COINS_Auth_User-production',
+    redirect: true,
+    redirectUrl: 'http://localhost:9000/my-app/',
+});
+```
+
 ### Methods
 
 You may call these methods on an instance of the widget:

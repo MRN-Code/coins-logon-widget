@@ -3,8 +3,17 @@ var CoinsLogonWidget = require('../scripts/coins-logon-widget.js');
 var cookies = require('js-cookie');
 var html = require('html!./index.html');
 var jQuery = require('jquery');
+var messages = require('../scripts/lib/messages.js');
 var Promise = this.Promise = require('bluebird'); // phantomJS polyfill. seriously. :-|
 var testUtils = require('./test-utils');
+
+/**
+ * Bind polyfill for PhantomJS.
+ * {@link https://github.com/Raynos/function-bind}
+ */
+if (!('bind' in Function)) {
+    Function.prototype.bind = require('function-bind');
+}
 
 jQuery(window.document.body).append(html);
 
@@ -100,16 +109,21 @@ test('api activity', {timeout: 2000}, function(t) {
         username: 'someun',
         password: 'somepassword',
     };
+
     testUtils.setWidgetFields(wigetData);
-    Promise.resolve(myWidget.login(wigetData))
-    .then(function() {
-        t.equal(jQuery('#api_call_form button').text(), 'Log Out', 'login cycle successful');
-    })
-    .catch(t.fail)
-    .then(function() {
-        testUtils.teardownWidget(myWidget);
-        t.end();
-    });
+
+    myWidget.login(wigetData)
+        .then(function() {
+            t.ok(
+                jQuery('#api_call_form button').eq(0).text(),
+                'Log Out',
+                'login cycle successful'
+            );
+        }, t.end)
+        .then(function() {
+            testUtils.teardownWidget(myWidget);
+            t.end();
+        });
 });
 
 test('initial logged in state', function(t) {
@@ -132,17 +146,19 @@ test('initial logged in state', function(t) {
     myWidget = testUtils.widgetFactory({
         authCookieName: authCookieName,
         baseUrl: 'http://localhost:12354',
+        checkAuth: true,
     });
 
     // Hijack widget internals to ensure checks fire at the appropriate time
     // TODO: Figure out better way to do this, maybe spies
-    var originalSetToLogout = myWidget.form.setToLogout;
-    myWidget.form.setToLogout = function(text) {
-        originalSetToLogout.call(myWidget.form, text);
+    var originalUpdate = myWidget.update;
+    myWidget.update = function(newState) {
+        originalUpdate.call(myWidget, newState);
         t.ok(
             jQuery(myWidget.element).text().indexOf(username) > 0,
             'UI shows username'
         );
+        myWidget.update = originalUpdate;
         testUtils.teardownWidget(myWidget);
         t.end();
     };
@@ -151,3 +167,151 @@ test('initial logged in state', function(t) {
         t.equal(response.username, username, 'retrieves username');
     });
 });
+
+test('horizontal form', function(t) {
+    var myWidget = testUtils.widgetFactory({
+        horizontal: true,
+    });
+    var $form = jQuery(myWidget.element).find('form');
+
+    t.ok(
+        $form.attr('class').indexOf('horizontal') !== -1,
+        'has horizontal class'
+    );
+
+    testUtils.teardownWidget(myWidget);
+
+    t.end();
+});
+
+test('default messages', function(t) {
+    var EVENTS = CoinsLogonWidget.EVENTS;
+    var myWidget = testUtils.widgetFactory();
+    var offset = '2 days';
+    var tomorrow = new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString();
+
+    myWidget.emit(EVENTS.LOGIN_ACCOUNT_EXPIRED);
+    t.equal(
+        testUtils.getNotification(myWidget).text(),
+        messages.accountExpired,
+        'Shows account expired message'
+    );
+
+    myWidget.emit(EVENTS.LOGIN_ACCOUNT_WILL_EXPIRE, {
+        user: {
+            acctExpDate: tomorrow,
+        },
+    });
+    t.equal(
+        testUtils.getNotification(myWidget).text(),
+        messages.accountWillExpire(offset),
+        'Shows account will expire message'
+    );
+
+    myWidget.emit(EVENTS.LOGIN_PASSWORD_EXPIRED);
+    t.equal(
+        testUtils.getNotification(myWidget).text(),
+        messages.passwordExpired,
+        'Shows password expired message'
+    );
+
+    myWidget.emit(EVENTS.LOGIN_PASSWORD_WILL_EXPIRE, {
+        user: {
+            passwordExpDate: tomorrow,
+        },
+    });
+    t.equal(
+        testUtils.getNotification(myWidget).text(),
+        messages.passwordWillExpire(offset),
+        'Shows password will expire message'
+    );
+
+    testUtils.teardownWidget(myWidget);
+    t.end();
+});
+
+test('custom messages', function(t) {
+    var EVENTS = CoinsLogonWidget.EVENTS;
+    var customMessages = {
+        accountExpired: Math.random().toString(),
+        accountWillExpire: function(offset) {
+            return [
+                '<p>Your account will expire in ' + offset + '.',
+                '<a href="#">Reset it!</a></p>',
+            ].join(' ');
+        },
+
+        passwordExpired: Math.random().toString(),
+        passwordWillExpire: function(offset) {
+            return '<p><span>Your</span> password <b>is</b> <em>gross</em></p>';
+        },
+
+    };
+    var myWidget = testUtils.widgetFactory({
+        messages: customMessages,
+    });
+    var offset = '2 days';
+    var tomorrow = new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString();
+
+    myWidget.emit(EVENTS.LOGIN_ACCOUNT_EXPIRED);
+    t.equal(
+        testUtils.getNotification(myWidget).html(),
+        customMessages.accountExpired,
+        'Shows account expired message'
+    );
+
+    myWidget.emit(EVENTS.LOGIN_ACCOUNT_WILL_EXPIRE, {
+        user: {
+            acctExpDate: tomorrow,
+        },
+    });
+    t.equal(
+        testUtils.getNotification(myWidget).html(),
+        customMessages.accountWillExpire(offset),
+        'Shows account will expire message'
+    );
+
+    myWidget.emit(EVENTS.LOGIN_PASSWORD_EXPIRED);
+    t.equal(
+        testUtils.getNotification(myWidget).html(),
+        customMessages.passwordExpired,
+        'Shows password expired message'
+    );
+
+    myWidget.emit(EVENTS.LOGIN_PASSWORD_WILL_EXPIRE, {
+        user: {
+            passwordExpDate: tomorrow,
+        },
+    });
+    t.equal(
+        testUtils.getNotification(myWidget).html(),
+        customMessages.passwordWillExpire(offset),
+        'Shows password will expire message'
+    );
+
+    testUtils.teardownWidget(myWidget);
+    t.end();
+});
+
+test('redirect property/button', function(t) {
+    var redirectUrl = 'http://localhost:1337';
+    var myWidget = testUtils.widgetFactory({
+        redirectUrl: redirectUrl,
+    });
+    var $widget = jQuery(myWidget.element);
+
+    myWidget.update({ isLoggedIn: true });
+    t.ok(
+        $widget.find('a.coins-logon-widget-button').length,
+        'Has redirect link'
+    );
+    t.equal(
+        $widget.find('a.coins-logon-widget-button').attr('href'),
+        redirectUrl,
+        'Redirect URL added to link'
+    );
+
+    testUtils.teardownWidget(myWidget);
+    t.end();
+});
+
