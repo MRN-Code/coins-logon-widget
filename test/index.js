@@ -315,3 +315,35 @@ test('redirect property/button', function(t) {
     t.end();
 });
 
+/**
+ * Ensure that the username and password fields' values are persisted when the
+ * widget re-renders its `form` component.
+ */
+test('inputs maintain value', function(t) {
+    var username = 'Test Mc\'Testem';
+    var password = 'most_secret_password';
+    var myWidget = testUtils.widgetFactory();
+    var $widget = jQuery(myWidget.element);
+
+    testUtils.setWidgetFields({
+        password: password,
+        username: username,
+        widget: myWidget,
+    });
+
+    myWidget.emit(CoinsLogonWidget.EVENTS.LOGIN_ERROR, 'Invalid credentials');
+
+    t.equal(
+        $widget.find('input[name=username]').val(),
+        username,
+        'Username input value maintained'
+    );
+    t.equal(
+        $widget.find('input[name=password]').val(),
+        password,
+        'Password input value maintained'
+    );
+
+    t.end();
+});
+

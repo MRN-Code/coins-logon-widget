@@ -126,6 +126,16 @@ CoinsLogonWidget.prototype.destroy = function() {
     this.removeAllListeners();
 };
 
+CoinsLogonWidget.prototype.getFormData = function() {
+    var password = this.element.querySelector('input[name=password]').value;
+    var username = this.element.querySelector('input[name=username]').value;
+
+    return {
+        password: password,
+        username: username,
+    };
+};
+
 CoinsLogonWidget.prototype.init = function() {
     this._tree = form(this._state);
     this._rootNode = createElement(this._tree);
@@ -136,8 +146,9 @@ CoinsLogonWidget.prototype.init = function() {
 CoinsLogonWidget.prototype.login = function() {
     var self = this;
     var EVENTS = CoinsLogonWidget.EVENTS;
-    var password = this.element.querySelector('input[name=password]').value;
-    var username = this.element.querySelector('input[name=username]').value;
+    var formData = this.getFormData();
+    var password = formData.password;
+    var username = formData.username;
     var state;
 
     // Validate input (make sure it isn't empty)
@@ -230,6 +241,15 @@ CoinsLogonWidget.prototype.update = function(newState) {
     }
 
     this._state = merge({}, this._state, newState);
+
+    // Persist fields' values if not logged in
+    if (!this._state.isLoggedIn) {
+        var formData = this.getFormData();
+        this._state.passwordProps.value = formData.password;
+        this._state.usernameProps.value = formData.username;
+    } else {
+        this._state.passwordProps.value = '';
+    }
 
     var newTree = form(this._state);
     var patches = diff(this._tree, newTree);
