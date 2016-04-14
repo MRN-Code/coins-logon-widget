@@ -121,6 +121,7 @@ $coins-logon-widget-colors: (
  *
  * @todo  Add hooks for more input types.
  */
+input[type="email"],
 input[type="password"],
 input[type="text"] {
     $background: map-get($coins-logon-widget-colors, 'input-background');
