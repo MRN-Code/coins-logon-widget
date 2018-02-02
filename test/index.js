@@ -96,7 +96,7 @@ test('field order', function(t) {
     t.end();
 });
 
-test('api activity', {timeout: 2000}, function(t) {
+test('api activity', { timeout: 2000 }, function(t) {
     t.plan(1);
     var el = document.getElementById('api_call_form');
     var myWidget = testUtils.widgetFactory({
