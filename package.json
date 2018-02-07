@@ -1,6 +1,6 @@
 {
   "name": "coins-logon-widget",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "COINS Logon Widget.  Injectable utility to manage browser authorization with COINS",
   "main": "scripts/coins-logon-widget.js",
   "style": "dist/coins-logon-widget.css",
