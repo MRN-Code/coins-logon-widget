@@ -71,6 +71,8 @@ function form(props) {
         if (errorMessage) {
             children.push(notification({ text: errorMessage }));
             className += ' coins-logon-widget-form-error';
+        } else {
+            children.push(new VNode('div', { className: 'no-alert' }));
         }
 
         children.push(
