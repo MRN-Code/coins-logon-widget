@@ -1,10 +1,6 @@
 var path = require('path');
 var webpack = require('webpack');
-var DedupePlugin = webpack.optimize.DedupePlugin;
-var UglifyJsPlugin = webpack.optimize.UglifyJsPlugin;
 var pkg = require('./package.json');
-
-var isDev = process.env.COINS_ENV === 'development';
 
 module.exports = {
     node: {
@@ -20,14 +16,7 @@ module.exports = {
         libraryTarget: 'umd',
         umdNamedDefine: true,
     },
-    plugins: [
-        new DedupePlugin()
-    ].concat(isDev ? [
-        new webpack.optimize.UglifyJsPlugin({
-            sourceMap: false,
-            compress: {
-                warnings: false
-            }
-        })
-    ] : [])
+    optimization: {
+        minimize: true
+    }
 };
