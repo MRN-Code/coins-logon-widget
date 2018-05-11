@@ -1,7 +1,7 @@
 var test = require('tape');
 var CoinsLogonWidget = require('../scripts/coins-logon-widget.js');
 var cookies = require('js-cookie');
-var html = require('html!./index.html');
+var html = require('html-loader!./index.html');
 var jQuery = require('jquery');
 var messages = require('../scripts/lib/messages.js');
 var Promise = this.Promise = require('bluebird'); // phantomJS polyfill. seriously. :-|
