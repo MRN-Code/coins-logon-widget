@@ -1,5 +1,5 @@
 'use strict';
-var merge = require('lodash/object/merge');
+var merge = require('lodash/merge');
 var cookies = require('js-cookie');
 var hawk = require('hawk/lib/browser');
 
