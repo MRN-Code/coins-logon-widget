@@ -1,11 +1,13 @@
 'use strict';
+var sass = require('node-sass');
 module.exports = function(grunt) {
     return {
         options: {
             sourceMap: true,
             sourceMapEmbed: true,
             sourceMapContents: true,
-            includePaths: ['.']
+            includePaths: ['.'],
+            implementation: sass
         },
         dist: {
             files: [{

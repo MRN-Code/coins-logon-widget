@@ -1,10 +1,10 @@
 'use strict';
 
-var assign = require('lodash/object/assign');
+var assign = require('lodash/assign');
 var CoinsLogonWidget = require('../scripts/coins-logon-widget');
 var cookies = require('js-cookie');
 var jQuery = require('jquery');
-var uniqueId = require('lodash/utility/uniqueId');
+var uniqueId = require('lodash/uniqueId');
 
 var defaults = {
     authCookieName: 'coins-cookie-nom-noms',

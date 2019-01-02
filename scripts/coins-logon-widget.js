@@ -5,10 +5,10 @@ var createElement = require('virtual-dom/create-element');
 var diff = require('virtual-dom/diff');
 var EventEmitter = require('wolfy87-eventemitter');
 var form = require('./components/form');
-var merge = require('lodash/object/merge');
+var merge = require('lodash/merge');
 var messages = require('./lib/messages');
 var patch = require('virtual-dom/patch');
-var uniqueId = require('lodash/utility/uniqueId');
+var uniqueId = require('lodash/uniqueId');
 var utils = require('./lib/utils');
 
 /**
